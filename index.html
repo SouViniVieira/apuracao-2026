@@ -111,6 +111,7 @@ html { scroll-padding-top: 170px; }
     </div>
     <nav class="pages" aria-label="Páginas">
       <a href="index.html" aria-current="page">Apuração</a>
+      <a href="historico.html">Como foi a noite</a>
       <a href="pesquisas.html">Pesquisas e projeção</a>
     </nav>
   </header>
@@ -171,8 +172,8 @@ html { scroll-padding-top: 170px; }
       </details>
     </section>
     <section class="card" aria-labelledby="t-evol">
-      <h2 id="t-evol">Evolução conforme as seções são apuradas</h2>
-      <p class="note" style="margin:0">Em 2022, Bolsonaro liderou até cerca de 67% das urnas e Lula virou depois: a ordem de chegada muda a liderança parcial. O gráfico guarda as parciais vistas neste navegador.</p>
+      <h2 id="t-evol">Parcial e tendência ao longo da apuração</h2>
+      <p class="note" style="margin:0">Em 2022, Bolsonaro liderou até cerca de 67% das urnas e Lula virou depois: a ordem de chegada muda a liderança parcial. O gráfico mostra todas as parciais desde as 17h.</p>
       <div class="box" id="evol" style="margin-top:10px"></div>
       <div class="legend"><span>Linha cheia: parcial</span><span>Tracejada: tendência naquele momento</span></div>
     </section>
@@ -189,8 +190,8 @@ html { scroll-padding-top: 170px; }
   <footer class="note">Dados: API pública de resultados do TSE (resultados.tse.jus.br), consultada a cada 30 segundos; mapa: malha de estados do IBGE. Percentuais sobre votos válidos. Projeto de estudo, sem vínculo com candidatos ou partidos.</footer>
 </main>
 
+<script src="comum.js"></script>
 <script>
-const UF_NOME = { AC: 'Acre', AL: 'Alagoas', AP: 'Amapá', AM: 'Amazonas', BA: 'Bahia', CE: 'Ceará', DF: 'Distrito Federal', ES: 'Espírito Santo', GO: 'Goiás', MA: 'Maranhão', MT: 'Mato Grosso', MS: 'Mato Grosso do Sul', MG: 'Minas Gerais', PA: 'Pará', PB: 'Paraíba', PR: 'Paraná', PE: 'Pernambuco', PI: 'Piauí', RJ: 'Rio de Janeiro', RN: 'Rio Grande do Norte', RS: 'Rio Grande do Sul', RO: 'Rondônia', RR: 'Roraima', SC: 'Santa Catarina', SP: 'São Paulo', SE: 'Sergipe', TO: 'Tocantins', ZZ: 'Exterior', BR: 'Brasil' };
 // Estados pequenos demais para clicar no mapa ganham uma etiqueta ao lado, ligada por uma linha.
 const PEQUENOS = ['RN', 'PB', 'PE', 'AL', 'SE', 'ES', 'RJ'];
 const NS = 'http://www.w3.org/2000/svg';
@@ -215,9 +216,6 @@ function showTip(box, tip, ev, head, body) {
 function historico() { try { return JSON.parse(localStorage.getItem('apur26') || '[]'); } catch { return []; } }
 function salvarHist(h) { try { localStorage.setItem('apur26', JSON.stringify(h)); } catch {} }
 
-// Participação de Flávio considerando só os dois (no 1º turno havia outros candidatos).
-const doisLados = (d) => d && d.flavio && d.lula && (d.flavio.votos + d.lula.votos) > 0 ? 100 * d.flavio.votos / (d.flavio.votos + d.lula.votos) : null;
-const temVotos = (d) => d && d.flavio && d.lula && d.apuradas_pct > 0 && (d.flavio.votos + d.lula.votos) > 0;
 function dadosDe(uf) { if (!ultimo) return null; return uf === 'BR' ? ultimo.brasil : (ultimo.estados || []).find((e) => e.uf === uf) || null; }
 function primeiroDe(uf) { if (!primeiro) return null; return uf === 'BR' ? primeiro.brasil : (primeiro.estados || []).find((e) => e.uf === uf) || null; }
 function mudanca(uf) {
@@ -423,33 +421,6 @@ function drawDetalhe() {
   }
 }
 
-// Tendência do resultado final, estado a estado. Em cada estado, o que falta apurar segue o que
-// já foi apurado lá; estados sem votos seguem o 1º turno (só os dois) mais a mudança média dos
-// estados que já começaram. Corrige a ordem de chegada entre estados, não a de dentro de cada um.
-function tendencia(atual, prim) {
-  if (!atual || !prim || !temVotos(atual.brasil)) return null;
-  const linhas = [];
-  let somaMud = 0, pesoMud = 0, comVotos = 0;
-  for (const uf of Object.keys(UF_NOME)) {
-    if (uf === 'BR') continue;
-    const d = (atual.estados || []).find((e) => e.uf === uf), p = (prim.estados || []).find((e) => e.uf === uf);
-    if (!p || doisLados(p) == null) continue;
-    const frac = d && d.eleitorado ? d.eleitorado_apurado / d.eleitorado : 0;
-    const tem = temVotos(d) && frac > 0;
-    if (tem) { const peso = d.flavio.votos + d.lula.votos; somaMud += (doisLados(d) - doisLados(p)) * peso; pesoMud += peso; comVotos++; }
-    linhas.push({ d, p, frac, tem });
-  }
-  const mud = pesoMud ? somaMud / pesoMud : 0;
-  let total = 0, flavio = 0;
-  for (const x of linhas) {
-    const base = x.p.validos || (x.p.flavio.votos + x.p.lula.votos);
-    // Com menos de 10% apurado, a conta "votos / fração" oscila demais: usa o tamanho do 1º turno.
-    const esperado = x.tem && x.frac >= 0.1 ? (x.d.flavio.votos + x.d.lula.votos) / x.frac : base;
-    const share = x.tem ? doisLados(x.d) : Math.min(100, Math.max(0, doisLados(x.p) + mud));
-    total += esperado; flavio += esperado * share / 100;
-  }
-  return total ? { f: 100 * flavio / total, mud, comVotos, estados: linhas.length } : null;
-}
 
 function drawTendencia(t, b) {
   const box = $('tend'); box.textContent = '';
@@ -517,7 +488,7 @@ function drawEvol(h) {
   [['f', css('--f')], ['l', css('--l')]].forEach(([k, c]) => {
     el('path', { d: h.map((p, i) => (i ? 'L' : 'M') + x(p.a) + ',' + y(p[k])).join(''), fill: 'none', stroke: c, 'stroke-width': 2 }, s);
     h.forEach((p) => {
-      const ci = el('circle', { cx: x(p.a), cy: y(p[k]), r: 3.5, fill: c }, s);
+      const ci = el('circle', { cx: x(p.a), cy: y(p[k]), r: h.length > 60 ? 2.2 : 3.5, fill: c }, s);
       ci.addEventListener('mousemove', (ev) => showTip(box, tip, ev, `${br(p.a)}% apurado · ${p.h || ''}`, `Flávio ${br(p.f)}% · Lula ${br(p.l)}%` + (p.t != null ? ` · tendência Flávio ${br(p.t, 1)}%` : '')));
       ci.addEventListener('mouseleave', () => tip.style.display = 'none');
     });
@@ -551,7 +522,7 @@ function render() {
   } else $('dif').textContent = 'Os votos começam a sair às 17h.';
   $('escolha').value = selecionado;
   drawMapa(); drawDetalhe(); const t = tendencia(ultimo, primeiro);
-  drawTendencia(t, b); drawRegua(tem ? b.flavio.pct : null, t ? t.f : null); drawEvol(historico()); drawTabela();
+  drawTendencia(t, b); drawRegua(tem ? b.flavio.pct : null, t ? t.f : null); drawEvol(pontosEvol()); drawTabela();
 }
 
 let consultando = false;
@@ -598,9 +569,23 @@ function atualizarAgora() {
   atualizar();
 }
 
-// 1º turno: carregado uma vez, para a comparação por estado.
+// 1º turno: carregado uma vez, para a comparação por estado e para a tendência.
 async function carregarPrimeiro() {
-  try { const r = await fetch('api/apuracao?e=6257'); if (r.ok) { primeiro = await r.json(); render(); } } catch {}
+  try { const r = await fetch('api/apuracao?e=6257'); if (r.ok) { primeiro = await r.json(); render(); atualizarPublicado(); } } catch {}
+}
+
+// Histórico publicado (data/historico.json, atualizado a cada poucos minutos durante a noite):
+// assim quem abre a página tarde vê a curva desde as 17h. As parciais vistas neste navegador
+// completam o intervalo entre uma publicação e outra.
+let publicado = [];
+async function atualizarPublicado() {
+  if (!primeiro) return;
+  const p = await carregarHistorico(primeiro);
+  if (p) { publicado = p; render(); }
+}
+function pontosEvol() {
+  const max = publicado.length ? publicado[publicado.length - 1].a : -1;
+  return [...publicado.map(({ a, f, l, h, t }) => ({ a, f, l, h, t })), ...historico().filter((p) => p.a > max)].sort((x, y) => x.a - y.a);
 }
 
 $('sync').addEventListener('click', atualizarAgora);
@@ -615,6 +600,7 @@ Promise.all([
 atualizar();
 carregarPrimeiro();
 setInterval(atualizar, 30000);
+setInterval(atualizarPublicado, 120000);
 </script>
 </body>
 </html>

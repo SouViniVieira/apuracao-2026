@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Como foi a noite · 2º turno 2026</title>
+<meta name="description" content="A apuração do 2º turno de 2026 do começo ao fim: parciais, tendência e os momentos que mudaram a noite.">
+<link rel="stylesheet" href="style.css">
+<style>
+.momentos { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+.momentos button { width: 100%; text-align: left; display: grid; grid-template-columns: 4.2rem 1fr; gap: 10px; align-items: baseline; padding: 10px 12px; min-height: 44px; }
+.momentos button[aria-current="true"] { border-color: var(--fg); box-shadow: inset 3px 0 0 var(--fg); }
+.momentos .quando { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 14px; }
+.momentos b { display: block; font-size: 15px; }
+.momentos span.det { color: var(--muted); font-size: 14px; }
+.controles { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; margin-top: 10px; }
+.controles label { font-size: 14px; color: var(--muted); }
+.controles input[type="range"] { flex: 1 1 260px; min-height: 44px; accent-color: var(--fg); }
+.agora { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 12px; }
+.agora > div { background: var(--bg); border-radius: 10px; padding: 10px 12px; }
+.agora .lbl { font-size: 13px; color: var(--muted); }
+.agora .num { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.agora .num small { font-size: 14px; font-weight: 500; color: var(--muted); }
+.lead { margin: 12px 0 0; font-size: 17px; font-weight: 650; }
+.mapa-h { max-width: 640px; margin: 12px auto 0; }
+details.estados { margin-top: 12px; }
+details.estados summary { cursor: pointer; font-weight: 600; min-height: 36px; display: flex; align-items: center; }
+.vazio { background: var(--bg); border: 1px dashed var(--line); border-radius: 10px; padding: 18px; text-align: center; }
+.vazio b { display: block; font-size: 17px; }
+.vazio span { color: var(--muted); font-size: 14px; }
+.pilha { display: grid; gap: 16px; }
+.pilha[hidden] { display: none; }
+.veredito { font-size: 18px; font-weight: 650; margin: 6px 0 0; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="top">
+    <div>
+      <h1>Como foi a noite da apuração</h1>
+      <div class="sub"><span id="status" role="status">Carregando o histórico…</span></div>
+    </div>
+    <nav class="pages" aria-label="Páginas">
+      <a href="index.html">Apuração</a>
+      <a href="historico.html" aria-current="page">Como foi a noite</a>
+      <a href="pesquisas.html">Pesquisas e projeção</a>
+    </nav>
+  </header>
+
+  <div id="semdados" class="card" hidden>
+    <div class="vazio"><b>A noite ainda não começou</b><span>O histórico é gravado a partir dos primeiros votos, às 17h, e aparece aqui alguns minutos depois. Enquanto isso, a <a href="index.html">página da apuração</a> mostra tudo ao vivo.</span></div>
+  </div>
+
+  <div id="comdados" class="pilha" hidden>
+    <section class="card" aria-labelledby="t-mom">
+      <h2 id="t-mom">Os momentos da noite</h2>
+      <p class="note" style="margin:0">Escolha um momento para ver como estava a apuração naquela hora.</p>
+      <ol class="momentos" id="momentos"></ol>
+    </section>
+
+    <section class="card" aria-labelledby="t-linha">
+      <h2 id="t-linha">Volte a qualquer momento</h2>
+      <div class="controles">
+        <label for="tempo">Momento da apuração</label>
+        <input type="range" id="tempo" min="0" max="0" value="0" step="1">
+        <button type="button" id="play">Reproduzir a noite</button>
+      </div>
+      <p class="lead" id="lead"></p>
+      <div class="agora" id="agora"></div>
+      <div class="box mapa-h" id="mapa"></div>
+      <div class="legend" style="justify-content:center">
+        <span><span class="sq" style="background:var(--l)"></span>Lula lidera</span>
+        <span><span class="sq" style="background:var(--f)"></span>Flávio lidera</span>
+        <span><span class="sq" style="background:var(--grid)"></span>Ainda sem votos</span>
+      </div>
+      <details class="estados">
+        <summary>Ver os estados neste momento</summary>
+        <div class="table-wrap">
+          <table>
+            <caption class="sr-only">Resultado por estado no momento escolhido</caption>
+            <thead><tr><th scope="col">Estado</th><th scope="col">Apurado</th><th scope="col">Lula</th><th scope="col">Flávio</th></tr></thead>
+            <tbody id="tabela"></tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+
+    <section class="card" aria-labelledby="t-graf">
+      <h2 id="t-graf">Parcial e tendência ao longo da noite</h2>
+      <p class="note" style="margin:0">A parcial mostra só os votos já contados. A tendência estima o resultado final estado a estado (<a href="index.html#t-regua">como é calculada</a>). Clique no gráfico para ir àquele momento.</p>
+      <div class="box" id="grafico" style="margin-top:10px"></div>
+      <div class="legend">
+        <span><span class="sq" style="background:var(--l)"></span>Lula, parcial</span>
+        <span><span class="sq" style="background:var(--f)"></span>Flávio, parcial</span>
+        <span>Tracejado: tendência</span>
+        <span>Linha vertical: momento escolhido</span>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="t-acerto" id="acerto" hidden>
+      <h2 id="t-acerto">Quem chegou mais perto do resultado</h2>
+      <p class="veredito" id="veredito"></p>
+      <p class="note" id="vespera"></p>
+      <div class="table-wrap">
+        <table>
+          <caption>Parcial e tendência em cada hora, comparadas ao resultado final (Flávio, só os dois)</caption>
+          <thead><tr><th scope="col">Horário</th><th scope="col">Apurado</th><th scope="col">Parcial</th><th scope="col">Erro da parcial</th><th scope="col">Tendência</th><th scope="col">Erro da tendência</th></tr></thead>
+          <tbody id="horas"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <footer class="note">Parciais gravadas a cada 30 segundos a partir da API pública de resultados do TSE; mapa: malha de estados do IBGE. Percentuais sobre os votos dos dois candidatos. Projeto de estudo, sem vínculo com candidatos ou partidos.</footer>
+</main>
+
+<script src="comum.js"></script>
+<script>
+const NS = 'http://www.w3.org/2000/svg';
+const $ = (id) => document.getElementById(id);
+const br = (v, d = 1) => v == null || isNaN(v) ? '—' : Number(v).toFixed(d).replace('.', ',');
+const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const PEQUENOS = ['RN', 'PB', 'PE', 'AL', 'SE', 'ES', 'RJ'];
+const horaBR = (iso) => new Date(iso).toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' });
+let pontos = [], mapa = null, projecao = null, primeiro = null, idx = 0, seguindo = true, tocando = null;
+
+function el(tag, attrs, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+function txt(parent, x, y, t, anchor, color, weight, size) { const e = el('text', { x, y, 'text-anchor': anchor || 'start', fill: color || css('--muted'), 'font-size': size || 12, 'font-weight': weight || 400 }, parent); e.textContent = t; return e; }
+function h(tag, cls, texto, pai) { const e = document.createElement(tag); if (cls) e.className = cls; if (texto != null) e.textContent = texto; if (pai) pai.appendChild(e); return e; }
+const lider = (f) => f >= 50 ? 'Flávio' : 'Lula';
+const final = () => pontos.length && pontos[pontos.length - 1].a >= 99.99;
+
+// ---------- Momentos ----------
+function momentos() {
+  const m = [], P = pontos;
+  if (!P.length) return m;
+  const p0 = P[0];
+  m.push({ i: 0, titulo: 'Saem os primeiros votos', det: `${br(p0.a, 2)}% apurado: ${lider(p0.f)} na frente com ${br(Math.max(p0.f, p0.l))}%.` });
+  for (let i = 1; i < P.length; i++) {
+    if ((P[i].f >= 50) !== (P[i - 1].f >= 50)) m.push({ i, titulo: `${lider(P[i].f)} passa à frente na parcial`, det: `Com ${br(P[i].a)}% apurado: Lula ${br(P[i].l)}% x Flávio ${br(P[i].f)}%.` });
+  }
+  for (const marco of [25, 50, 75, 90]) {
+    const i = P.findIndex((p) => p.a >= marco);
+    if (i > 0) m.push({ i, titulo: marco === 50 ? 'Metade das urnas apuradas' : `${marco}% das urnas apuradas`, det: `Parcial: Lula ${br(P[i].l)}% x Flávio ${br(P[i].f)}%` + (P[i].t != null ? `. Tendência: ${lider(P[i].t)} com ${br(Math.max(P[i].t, 100 - P[i].t))}%.` : '.') });
+  }
+  const comT = P.map((p, i) => ({ ...p, i })).filter((p) => p.t != null);
+  if (comT.length && final()) {
+    let k = 0;
+    for (let j = 1; j < comT.length; j++) if ((comT[j].t >= 50) !== (comT[j - 1].t >= 50)) k = j;
+    const v = lider(comT[comT.length - 1].t);
+    m.push(k === 0
+      ? { i: comT[0].i, titulo: `A tendência aponta ${v} desde o começo`, det: `Já nos primeiros votos a conta estado a estado indicava a vitória de ${v}, e não mudou mais.` }
+      : { i: comT[k].i, titulo: `A tendência passa a apontar ${v}`, det: `Com ${br(comT[k].a)}% apurado. Daqui em diante ela não mudou mais.` });
+  }
+  if (final()) {
+    const u = P[P.length - 1];
+    m.push({ i: P.length - 1, titulo: `Resultado final: ${lider(u.f)} vence`, det: `Lula ${br(u.l, 2)}% x Flávio ${br(u.f, 2)}%, com 100% das urnas apuradas.` });
+  }
+  return m.sort((a, b) => a.i - b.i);
+}
+
+function drawMomentos() {
+  const ol = $('momentos'), foco = document.activeElement && ol.contains(document.activeElement) ? document.activeElement.dataset.i : null;
+  ol.textContent = '';
+  for (const mo of momentos()) {
+    const li = h('li', null, null, ol), b = h('button', null, null, li);
+    b.type = 'button'; b.dataset.i = mo.i;
+    if (mo.i === idx) b.setAttribute('aria-current', 'true');
+    h('span', 'quando', horaBR(pontos[mo.i].quando), b);
+    const d = h('span', null, null, b); h('b', null, mo.titulo, d); h('span', 'det', mo.det, d);
+    b.addEventListener('click', () => irPara(mo.i));
+    if (foco === String(mo.i)) b.focus();
+  }
+}
+
+// ---------- Momento escolhido ----------
+function irPara(i) {
+  idx = Math.max(0, Math.min(pontos.length - 1, i));
+  seguindo = idx === pontos.length - 1;
+  drawMomento(); drawMomentos(); drawGrafico();
+}
+
+function drawMomento() {
+  const p = pontos[idx], r = $('tempo');
+  r.max = pontos.length - 1; r.value = idx;
+  r.setAttribute('aria-valuetext', `${horaBR(p.quando)}, ${br(p.a)}% apurado`);
+  const dif = p.f - p.l;
+  $('lead').textContent = `${horaBR(p.quando)}: ${lider(p.f)} à frente na parcial por ${br(Math.abs(dif))} pts` + (p.t != null ? `, tendência de ${lider(p.t)} com ${br(Math.max(p.t, 100 - p.t))}%.` : '.');
+  const box = $('agora'); box.textContent = '';
+  const card = (lbl, valor, cls, sufixo) => { const c = h('div', null, null, box); h('div', 'lbl', lbl, c); const n = h('div', 'num' + (cls ? ' ' + cls : ''), valor, c); if (sufixo) h('small', null, sufixo, n); };
+  card('Apurado', br(p.a), '', '%');
+  card('Lula', br(p.l), 'l', '%');
+  card('Flávio', br(p.f), 'f', '%');
+  card('Tendência de Flávio', p.t != null ? br(p.t) : '—', p.t != null ? (p.t >= 50 ? 'f' : 'l') : '', p.t != null ? '%' : '');
+  drawMapa(p.atual); drawTabela(p.atual);
+}
+
+function cor(d) {
+  if (!temVotos(d)) return { fill: css('--grid'), op: 1 };
+  const a = d.flavio.pct, b = d.lula.pct;
+  return { fill: a >= b ? css('--f') : css('--l'), op: 0.35 + Math.min(Math.abs(a - b), 30) / 30 * 0.65 };
+}
+function drawMapa(atual) {
+  const box = $('mapa'); box.textContent = '';
+  if (!mapa) return;
+  const W = mapa.w + 130, H = mapa.h, de = (uf) => atual.estados.find((e) => e && e.uf === uf);
+  const s = el('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%', 'aria-hidden': 'true' }); box.appendChild(s);
+  for (const [uf, g] of Object.entries(mapa.uf)) {
+    const c = cor(de(uf));
+    el('path', { d: g.d, fill: c.fill, 'fill-opacity': c.op, stroke: css('--panel'), 'stroke-width': 1.2 }, s);
+    if (!PEQUENOS.includes(uf)) txt(s, g.cx, g.cy + 4, uf, 'middle', css('--fg'), 650, uf === 'DF' ? 9 : 12);
+  }
+  const lista = PEQUENOS.map((uf) => ({ uf, ...mapa.uf[uf] })).sort((a, b) => a.cy - b.cy);
+  let y = 0; const bx = mapa.w + 34, bw = 84, bh = 34;
+  const etiqueta = (uf, yy, nome) => {
+    const c = cor(de(uf));
+    el('rect', { x: bx, y: yy, width: bw, height: bh, rx: 6, fill: css('--panel'), stroke: css('--line') }, s);
+    el('rect', { x: bx + 8, y: yy + 10, width: 14, height: 14, rx: 3, fill: c.fill, 'fill-opacity': c.op }, s);
+    txt(s, bx + 30, yy + 23, nome, 'start', css('--fg'), 650, 15);
+  };
+  for (const it of lista) {
+    y = Math.max(it.cy - bh / 2, y);
+    el('line', { x1: it.cx + 4, y1: it.cy, x2: bx, y2: y + bh / 2, stroke: css('--muted'), 'stroke-width': 1 }, s);
+    etiqueta(it.uf, y, it.uf); y += bh + 6;
+  }
+  etiqueta('ZZ', Math.max(y + 18, H - 40), 'EXT');
+}
+function drawTabela(atual) {
+  const tb = $('tabela'); tb.textContent = '';
+  const ufs = Object.keys(UF_NOME).filter((u) => u !== 'BR' && u !== 'ZZ').sort((a, b) => UF_NOME[a].localeCompare(UF_NOME[b], 'pt-BR'));
+  for (const uf of ['BR', ...ufs, 'ZZ']) {
+    const d = uf === 'BR' ? atual.brasil : atual.estados.find((e) => e && e.uf === uf), tr = h('tr', null, null, tb);
+    const th = h('th', null, UF_NOME[uf], tr); th.scope = 'row';
+    const tem = temVotos(d);
+    h('td', null, d ? br(d.apuradas_pct) + '%' : '—', tr);
+    h('td', tem ? 'l' : null, tem ? br(d.lula.pct) + '%' : '—', tr);
+    h('td', tem ? 'f' : null, tem ? br(d.flavio.pct) + '%' : '—', tr);
+  }
+}
+
+// ---------- Gráfico por horário ----------
+function drawGrafico() {
+  const box = $('grafico'); box.textContent = '';
+  const P = pontos; if (!P.length) return;
+  const W = Math.max(300, box.clientWidth), H = 260, m = { t: 12, r: 14, b: 28, l: 38 };
+  const ts = P.map((p) => Date.parse(p.quando)), t0 = ts[0], t1 = Math.max(ts[ts.length - 1], t0 + 60e3);
+  const vals = P.flatMap((p) => p.t != null ? [p.f, p.l, p.t, 100 - p.t] : [p.f, p.l]);
+  const lo = Math.min(44, Math.floor(Math.min(...vals)) - 1), hi = Math.max(56, Math.ceil(Math.max(...vals)) + 1);
+  const x = (t) => m.l + (t - t0) / (t1 - t0) * (W - m.l - m.r), y = (v) => m.t + (hi - v) / (hi - lo) * (H - m.t - m.b);
+  const u = P[P.length - 1];
+  const s = el('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%', role: 'img', 'aria-label': `Parcial e tendência das ${horaBR(P[0].quando)} às ${horaBR(u.quando)}. No último ponto, com ${br(u.a)}% apurado, Lula ${br(u.l)}% e Flávio ${br(u.f)}%. Os momentos acima e a tabela por hora trazem os mesmos dados.` });
+  box.appendChild(s);
+  for (let v = Math.ceil(lo / 2) * 2; v <= hi; v += 2) { el('line', { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), stroke: css('--grid') }, s); txt(s, m.l - 6, y(v) + 4, v + '%', 'end'); }
+  el('line', { x1: m.l, x2: W - m.r, y1: y(50), y2: y(50), stroke: css('--muted'), 'stroke-dasharray': '4 4' }, s);
+  // Marcas de hora cheia
+  for (let t = Math.ceil(t0 / 3600e3) * 3600e3; t <= t1; t += 3600e3) txt(s, x(t), H - 8, horaBR(new Date(t).toISOString()), 'middle');
+  const linha = (val, cor, tracejado) => {
+    const pts = P.map((p, i) => ({ v: val(p), t: ts[i] })).filter((q) => q.v != null);
+    if (pts.length < 1) return;
+    el('path', { d: pts.map((q, i) => (i ? 'L' : 'M') + x(q.t) + ',' + y(q.v)).join(''), fill: 'none', stroke: cor, 'stroke-width': tracejado ? 1.6 : 2.4, 'stroke-dasharray': tracejado ? '5 4' : 'none', opacity: tracejado ? .85 : 1 }, s);
+  };
+  linha((p) => p.t, css('--f'), true); linha((p) => p.t == null ? null : 100 - p.t, css('--l'), true);
+  linha((p) => p.f, css('--f')); linha((p) => p.l, css('--l'));
+  const xc = x(ts[idx]);
+  el('line', { x1: xc, x2: xc, y1: m.t, y2: H - m.b, stroke: css('--fg'), 'stroke-width': 1.5 }, s);
+  el('circle', { cx: xc, cy: y(P[idx].f), r: 4.5, fill: css('--f'), stroke: css('--panel'), 'stroke-width': 2 }, s);
+  el('circle', { cx: xc, cy: y(P[idx].l), r: 4.5, fill: css('--l'), stroke: css('--panel'), 'stroke-width': 2 }, s);
+  // Clique leva ao ponto mais próximo no tempo (o teclado usa o controle deslizante acima).
+  s.addEventListener('click', (e) => {
+    const r = s.getBoundingClientRect(), t = t0 + ((e.clientX - r.left) / r.width * W - m.l) / (W - m.l - m.r) * (t1 - t0);
+    let melhor = 0; ts.forEach((tt, i) => { if (Math.abs(tt - t) < Math.abs(ts[melhor] - t)) melhor = i; });
+    irPara(melhor);
+  });
+  s.style.cursor = 'pointer';
+}
+
+// ---------- Quem chegou mais perto ----------
+function drawAcerto() {
+  if (!final()) { $('acerto').hidden = true; return; }
+  $('acerto').hidden = false;
+  const u = pontos[pontos.length - 1], fim = u.f;
+  $('veredito').textContent = `Resultado: ${lider(fim)} vence com ${br(Math.max(fim, 100 - fim), 2)}% dos votos válidos.`;
+  if (projecao) {
+    const [a80, b80] = projecao.faixa80, [a50, b50] = projecao.faixa50;
+    const onde = fim >= a50 && fim <= b50 ? 'dentro da faixa de 50%' : fim >= a80 && fim <= b80 ? 'fora da faixa de 50%, mas dentro da de 80%' : 'fora até da faixa de 80%';
+    $('vespera').textContent = `A projeção da véspera dizia Flávio com ${br(projecao.flavio_central)}% (80% de chance entre ${br(a80)}% e ${br(b80)}%). O resultado de Flávio, ${br(fim, 2)}%, ficou ${onde}, ${br(Math.abs(fim - projecao.flavio_central))} pts do centro.`;
+  }
+  const tb = $('horas'); tb.textContent = '';
+  const ts = pontos.map((p) => Date.parse(p.quando));
+  const linhas = [0];
+  for (let t = Math.ceil(ts[0] / 3600e3) * 3600e3; t < ts[ts.length - 1]; t += 3600e3) {
+    let k = -1; ts.forEach((tt, i) => { if (tt <= t) k = i; });
+    if (k > linhas[linhas.length - 1]) linhas.push(k);
+  }
+  for (const i of linhas) {
+    const p = pontos[i], tr = h('tr', null, null, tb), th = h('th', null, horaBR(p.quando), tr); th.scope = 'row';
+    h('td', null, br(p.a) + '%', tr);
+    h('td', null, br(p.f) + '%', tr);
+    h('td', null, (p.f - fim >= 0 ? '+' : '') + br(p.f - fim) + ' pts', tr);
+    h('td', null, p.t != null ? br(p.t) + '%' : '—', tr);
+    h('td', null, p.t != null ? (p.t - fim >= 0 ? '+' : '') + br(p.t - fim) + ' pts' : '—', tr);
+  }
+}
+
+// ---------- Reproduzir ----------
+function parar() { clearInterval(tocando); tocando = null; $('play').textContent = 'Reproduzir a noite'; }
+$('play').addEventListener('click', () => {
+  if (tocando) return parar();
+  if (idx >= pontos.length - 1) irPara(0);
+  $('play').textContent = 'Pausar';
+  const passo = Math.max(1, Math.round(pontos.length / 120));
+  tocando = setInterval(() => { if (idx >= pontos.length - 1) return parar(); irPara(idx + passo); }, 120);
+});
+$('tempo').addEventListener('input', (e) => { parar(); irPara(Number(e.target.value)); });
+
+// ---------- Carregar ----------
+async function carregar() {
+  const novos = await carregarHistorico(primeiro);
+  if (!novos || !novos.length) {
+    $('semdados').hidden = false; $('comdados').hidden = true;
+    $('status').textContent = 'O histórico começa com os primeiros votos, às 17h.';
+    return;
+  }
+  const estavaNoFim = seguindo;
+  pontos = novos;
+  $('semdados').hidden = true; $('comdados').hidden = false;
+  if (estavaNoFim && !tocando) idx = pontos.length - 1;
+  const u = pontos[pontos.length - 1];
+  $('status').textContent = final()
+    ? `Apuração encerrada: ${pontos.length} parciais, das ${horaBR(pontos[0].quando)} às ${horaBR(u.quando)}.`
+    : `Gravado até ${horaBR(u.quando)} (${br(u.a)}% apurado). Atualiza sozinho a cada 2 minutos.`;
+  drawMomento(); drawMomentos(); drawGrafico(); drawAcerto();
+}
+
+Promise.all([
+  fetch('data/mapa-uf.json').then((r) => r.json()).then((j) => { mapa = j; }).catch(() => {}),
+  fetch('data/projecao.json').then((r) => r.json()).then((j) => { projecao = j; }).catch(() => {}),
+  fetch('api/apuracao?e=6257').then((r) => r.ok ? r.json() : null).then((j) => { primeiro = j; }).catch(() => {}),
+]).then(carregar);
+setInterval(() => { if (!final()) carregar(); }, 120000);
+window.addEventListener('resize', () => { if (pontos.length) { drawGrafico(); } });
+</script>
+</body>
+</html>

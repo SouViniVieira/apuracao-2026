@@ -4,6 +4,7 @@ Projeto de estudo feito durante o 2º turno da eleição presidencial de 2026. T
 
 - **Pesquisas e projeção** (`pesquisas.html`): as 53 pesquisas divulgadas entre os turnos, a média dos últimos 7 dias, a comparação de chances entre fontes e a projeção registrada na véspera da votação, com a explicação de como ela foi feita.
 - **Apuração ao vivo** (`index.html`): o resultado lido da API pública do TSE a cada 30 segundos, com mapa por estado, comparação com o 1º turno, evolução da apuração e a projeção da véspera ao lado do resultado.
+- **Como foi a noite** (`historico.html`): a apuração do começo ao fim, com os momentos que mudaram a noite, uma linha do tempo para voltar a qualquer hora e a comparação entre parcial, tendência e resultado final.
 
 Sem vínculo com candidatos, partidos ou institutos de pesquisa.
 
@@ -40,6 +41,12 @@ As pesquisas foram reunidas a partir de reportagens, sempre em votos válidos; q
 O resultado foi uma faixa para Flávio: 51,5% no centro, 50% de chance entre 49,8% e 53,2%, 80% de chance entre 48,3% e 54,7%.
 
 **Limites:** é uma estimativa subjetiva feita com ajuda de IA, não um modelo estatístico calibrado. As pesquisas vieram de notícias e podem ter erros de transcrição. Ficaram de fora a linha do tempo da campanha e os comentários diários do acompanhamento, porque citavam acusações entre candidatos que não foram verificadas.
+
+## Tendência e histórico
+
+A tendência estima o resultado final estado a estado: em cada estado, o que falta apurar segue o que já foi apurado lá; estados ainda sem votos seguem o 1º turno mais a mudança média dos que já começaram. Corrige a ordem de chegada entre estados (Sul e Sudeste antes do Nordeste), mas não as diferenças dentro de um mesmo estado. O código está em `comum.js`.
+
+O histórico foi gravado por `coleta/gravar.mjs`, que consultou o próprio site a cada 30 segundos durante a noite (sem consultas extras ao TSE) e publicou `data/historico.json` a cada 6 minutos.
 
 ## Rodar
 
