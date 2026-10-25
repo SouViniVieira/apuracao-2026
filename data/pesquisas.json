@@ -1,0 +1,376 @@
+{
+ "sobre": "Pesquisas do 2º turno de 2026 em votos válidos, reunidas a partir de notícias (Gazeta do Povo, CNN, Metrópoles, InfoMoney, Poder360 e outras) durante a campanha. Algumas foram convertidas de votos totais, como indicado em \"obs\". Dados reunidos com ajuda de IA a partir de reportagens: confira na fonte antes de reutilizar.",
+ "pesquisas": [
+  {
+   "instituto": "Datafolha",
+   "divulgacao": "2026-10-08",
+   "flavio": 52,
+   "lula": 48,
+   "obs": "Votos válidos"
+  },
+  {
+   "instituto": "PoderData/Aya",
+   "divulgacao": "2026-10-08",
+   "flavio": 53,
+   "lula": 47,
+   "obs": "Votos válidos"
+  },
+  {
+   "instituto": "AtlasIntel",
+   "divulgacao": "2026-10-09",
+   "flavio": 52.8,
+   "lula": 47.2,
+   "obs": "Votos válidos"
+  },
+  {
+   "instituto": "Ipespe",
+   "divulgacao": "2026-10-10",
+   "flavio": 52.7,
+   "lula": 47.3,
+   "obs": "Votos válidos; campo 6–8/10 (achada via 4pp, conferida no SBT News)"
+  },
+  {
+   "instituto": "BTG/Nexus",
+   "divulgacao": "2026-10-13",
+   "flavio": 52,
+   "lula": 48,
+   "obs": "Votos válidos"
+  },
+  {
+   "instituto": "Futura",
+   "divulgacao": "2026-10-13",
+   "flavio": 51.8,
+   "lula": 48.2,
+   "obs": "Votos válidos; campo 7–10/10 (achada via 4pp, conferida no Poder360)"
+  },
+  {
+   "instituto": "Gerp",
+   "divulgacao": "2026-10-13",
+   "flavio": 55,
+   "lula": 45,
+   "obs": "Votos válidos; campo 8, 9 e 12/10 (achada via 4pp, conferida no Poder360)"
+  },
+  {
+   "instituto": "PoderData/Aya (2ª)",
+   "divulgacao": "2026-10-13",
+   "flavio": 51,
+   "lula": 49,
+   "obs": "Votos válidos"
+  },
+  {
+   "instituto": "Quaest",
+   "divulgacao": "2026-10-14",
+   "flavio": 51.1,
+   "lula": 48.9,
+   "obs": "Convertido de 46% x 44% (votos totais)"
+  },
+  {
+   "instituto": "Datafolha (2ª)",
+   "divulgacao": "2026-10-15",
+   "flavio": 51,
+   "lula": 49,
+   "obs": "Votos válidos"
+  },
+  {
+   "instituto": "Indexa/Broadcast (1ª)",
+   "divulgacao": "2026-10-15",
+   "flavio": 51,
+   "lula": 49,
+   "obs": "Votos válidos"
+  },
+  {
+   "instituto": "Palver",
+   "divulgacao": "2026-10-15",
+   "flavio": 50.5,
+   "lula": 49.5,
+   "obs": "Convertido de 50% x 49%"
+  },
+  {
+   "instituto": "CNT/MDA (1ª)",
+   "divulgacao": "2026-10-16",
+   "flavio": 50.5,
+   "lula": 49.5,
+   "obs": "Votos válidos"
+  },
+  {
+   "instituto": "Futura (2ª)",
+   "divulgacao": "2026-10-16",
+   "flavio": 50.8,
+   "lula": 49.2,
+   "obs": "Convertido de 49% x 47,5%"
+  },
+  {
+   "instituto": "Gerp (2ª)",
+   "divulgacao": "2026-10-16",
+   "flavio": 52,
+   "lula": 48,
+   "obs": "Votos válidos"
+  },
+  {
+   "instituto": "PoderData/Aya (3ª)",
+   "divulgacao": "2026-10-16",
+   "flavio": 50,
+   "lula": 50,
+   "obs": "Votos válidos"
+  },
+  {
+   "instituto": "Ipespe/Abrapel (2ª)",
+   "divulgacao": "2026-10-17",
+   "flavio": 51.2,
+   "lula": 48.8,
+   "obs": "Votos válidos"
+  },
+  {
+   "instituto": "Veritá",
+   "divulgacao": "2026-10-17",
+   "flavio": 51.1,
+   "lula": 48.9,
+   "obs": "Votos válidos"
+  },
+  {
+   "instituto": "DataTrends (1ª)",
+   "divulgacao": "2026-10-18",
+   "flavio": 51.5,
+   "lula": 48.5,
+   "obs": "Votos válidos; campo 15–17/10; data de divulgação aproximada (via lista do Poder360)"
+  },
+  {
+   "instituto": "Vox Brasil (1ª)",
+   "divulgacao": "2026-10-18",
+   "flavio": 49,
+   "lula": 51,
+   "obs": "Votos válidos"
+  },
+  {
+   "instituto": "AtlasIntel (2ª)",
+   "divulgacao": "2026-10-19",
+   "flavio": 51.1,
+   "lula": 48.9,
+   "obs": "Votos válidos; campo 13–18/10, antes do debate"
+  },
+  {
+   "instituto": "BTG/Nexus (2ª)",
+   "divulgacao": "2026-10-19",
+   "flavio": 50.3,
+   "lula": 49.7,
+   "obs": "Votos válidos; campo 16–18/10, antes do debate"
+  },
+  {
+   "instituto": "Futura (3ª)",
+   "divulgacao": "2026-10-19",
+   "flavio": 50.4,
+   "lula": 49.6,
+   "obs": "Votos válidos; campo 16–17/10, antes do debate"
+  },
+  {
+   "instituto": "PoderData/Aya (4ª)",
+   "divulgacao": "2026-10-19",
+   "flavio": 52,
+   "lula": 48,
+   "obs": "Votos válidos; campo 16–18/10, antes do debate"
+  },
+  {
+   "instituto": "Alfa Inteligência (1ª)",
+   "divulgacao": "2026-10-20",
+   "flavio": 51.5,
+   "lula": 48.5,
+   "obs": "Votos válidos; campo 15–19/10, parte depois do debate"
+  },
+  {
+   "instituto": "Data Ranking",
+   "divulgacao": "2026-10-20",
+   "flavio": 49.6,
+   "lula": 50.4,
+   "obs": "Votos válidos; campo 14–16/10 (via Urna Aberta)"
+  },
+  {
+   "instituto": "Pesquisa França (1ª)",
+   "divulgacao": "2026-10-20",
+   "flavio": 50.8,
+   "lula": 49.2,
+   "obs": "Votos válidos; campo 16–20/10, maior parte depois do debate"
+  },
+  {
+   "instituto": "Real Time Big Data (1ª)",
+   "divulgacao": "2026-10-20",
+   "flavio": 52,
+   "lula": 48,
+   "obs": "Votos válidos; campo 15–19/10, parte depois do debate"
+  },
+  {
+   "instituto": "Futura (4ª)",
+   "divulgacao": "2026-10-21",
+   "flavio": 51.1,
+   "lula": 48.9,
+   "obs": "Votos válidos; campo 19–20/10, depois do debate"
+  },
+  {
+   "instituto": "Gerp (3ª)",
+   "divulgacao": "2026-10-21",
+   "flavio": 53,
+   "lula": 47,
+   "obs": "Votos válidos; campo 19–21/10, depois do debate"
+  },
+  {
+   "instituto": "Meio/Ideia",
+   "divulgacao": "2026-10-21",
+   "flavio": 51.1,
+   "lula": 48.9,
+   "obs": "Votos válidos; campo 15–19/10, parte depois do debate"
+  },
+  {
+   "instituto": "Palver (2ª)",
+   "divulgacao": "2026-10-21",
+   "flavio": 51,
+   "lula": 49,
+   "obs": "Convertido de 50% x 48%; campo 16–20/10"
+  },
+  {
+   "instituto": "Quaest (2ª)",
+   "divulgacao": "2026-10-21",
+   "flavio": 50.6,
+   "lula": 49.4,
+   "obs": "Convertido de 45% x 44% (votos totais); campo 17–20/10, quase todo depois do debate"
+  },
+  {
+   "instituto": "Veritá (2ª)",
+   "divulgacao": "2026-10-21",
+   "flavio": 50.7,
+   "lula": 49.3,
+   "obs": "Votos válidos; campo 15–19/10 (blog Cláudio Dantas). O site [4]pp lista números diferentes (50,3% x 45,9% totais), não confirmados"
+  },
+  {
+   "instituto": "Datafolha (3ª)",
+   "divulgacao": "2026-10-22",
+   "flavio": 50,
+   "lula": 50,
+   "obs": "Votos válidos; campo 20–22/10; totais 47% x 46%"
+  },
+  {
+   "instituto": "Indexa/Broadcast (2ª)",
+   "divulgacao": "2026-10-22",
+   "flavio": 50.6,
+   "lula": 49.4,
+   "obs": "Votos válidos; campo 20–21/10 (conferido no agregador Urna Aberta)"
+  },
+  {
+   "instituto": "PoderData/Aya (5ª)",
+   "divulgacao": "2026-10-22",
+   "flavio": 51,
+   "lula": 49,
+   "obs": "Votos válidos; campo 19–21/10, depois do debate"
+  },
+  {
+   "instituto": "Alfa Inteligência (2ª)",
+   "divulgacao": "2026-10-23",
+   "flavio": 52,
+   "lula": 48,
+   "obs": "Votos válidos; campo 18–22/10, presencial"
+  },
+  {
+   "instituto": "DataTrends (2ª)",
+   "divulgacao": "2026-10-23",
+   "flavio": 51.9,
+   "lula": 48.1,
+   "obs": "Votos válidos; campo 19–21/10 (via Urna Aberta)"
+  },
+  {
+   "instituto": "Ipespe/Abrapel (3ª)",
+   "divulgacao": "2026-10-23",
+   "flavio": 50.5,
+   "lula": 49.5,
+   "obs": "Votos válidos; campo 20–22/10, telefone"
+  },
+  {
+   "instituto": "Real Time Big Data (2ª)",
+   "divulgacao": "2026-10-23",
+   "flavio": 52,
+   "lula": 48,
+   "obs": "Votos válidos; campo 19–22/10"
+  },
+  {
+   "instituto": "Veritá (3ª)",
+   "divulgacao": "2026-10-23",
+   "flavio": 51.3,
+   "lula": 48.7,
+   "obs": "Votos válidos; campo 18–22/10"
+  },
+  {
+   "instituto": "Vetor/Arrow",
+   "divulgacao": "2026-10-23",
+   "flavio": 52.7,
+   "lula": 47.3,
+   "obs": "Votos válidos; campo 22–23/10, 6.867 entrevistas (via Urna Aberta)"
+  },
+  {
+   "instituto": "Vox Brasil (2ª)",
+   "divulgacao": "2026-10-23",
+   "flavio": 49.4,
+   "lula": 50.6,
+   "obs": "Votos válidos; campo 17–23/10, presencial"
+  },
+  {
+   "instituto": "AtlasIntel (3ª)",
+   "divulgacao": "2026-10-24",
+   "flavio": 50.8,
+   "lula": 49.2,
+   "obs": "Final (Bloomberg). Campo 18–23/10, 4.990 entrevistas. Flávio −0,3 vs 19/10."
+  },
+  {
+   "instituto": "BTG/Nexus (3ª)",
+   "divulgacao": "2026-10-24",
+   "flavio": 50.5,
+   "lula": 49.5,
+   "obs": "Votos válidos; campo 23–24/10, presencial, depois do debate"
+  },
+  {
+   "instituto": "CNT/MDA (2ª)",
+   "divulgacao": "2026-10-24",
+   "flavio": 50.7,
+   "lula": 49.3,
+   "obs": "Votos válidos; campo 21–23/10, presencial, pega o debate em parte"
+  },
+  {
+   "instituto": "Colectta",
+   "divulgacao": "2026-10-24",
+   "flavio": 49.7,
+   "lula": 50.3,
+   "obs": "Votos válidos; campo 23/10, presencial, 3 mil entrevistas"
+  },
+  {
+   "instituto": "Datafolha (4ª)",
+   "divulgacao": "2026-10-24",
+   "flavio": 51,
+   "lula": 49,
+   "obs": "Votos válidos; campo 23–24/10, 4.050 entrevistas presenciais, depois do debate"
+  },
+  {
+   "instituto": "Gerp (4ª)",
+   "divulgacao": "2026-10-24",
+   "flavio": 52,
+   "lula": 48,
+   "obs": "Votos válidos; campo 22–24/10, telefone"
+  },
+  {
+   "instituto": "Palver (3ª)",
+   "divulgacao": "2026-10-24",
+   "flavio": 50.5,
+   "lula": 49.5,
+   "obs": "Final. Totais 50 x 49, convertido para válidos. Lula subiu 1 vs 21/10."
+  },
+  {
+   "instituto": "Pesquisa França (2ª)",
+   "divulgacao": "2026-10-24",
+   "flavio": 51.4,
+   "lula": 48.6,
+   "obs": "Votos válidos; campo 21–23/10 (via lista do Poder360)"
+  },
+  {
+   "instituto": "Quaest (3ª)",
+   "divulgacao": "2026-10-24",
+   "flavio": 51,
+   "lula": 49,
+   "obs": "Final. Campo 23–24/10, 3.702 entrevistas. Totais 46 x 45. Rejeição Flávio 49, Lula 47."
+  }
+ ]
+}

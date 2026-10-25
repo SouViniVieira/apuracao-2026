@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pesquisas e projeção · 2º turno 2026</title>
+<meta name="description" content="As pesquisas do 2º turno de 2026, a média, a projeção registrada na véspera e como ela foi feita.">
+<link rel="stylesheet" href="style.css">
+<style>
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+.chance-row { display: grid; grid-template-columns: minmax(9rem, 13rem) 1fr 3.5rem; gap: 10px; align-items: center; font-size: 14px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.chance-row:last-child { border-bottom: 0; }
+.chance-bar { height: 12px; border-radius: 6px; background: var(--grid); overflow: hidden; }
+.chance-bar span { display: block; height: 100%; background: var(--l); }
+.chance-row .val { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.chance-row small { display: block; color: var(--muted); font-size: 12.5px; }
+@media (max-width: 560px) { .chance-row { grid-template-columns: 1fr 3.5rem; } .chance-bar { grid-column: 1 / -1; grid-row: 2; } }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="top">
+    <div>
+      <h1>Pesquisas e projeção do 2º turno 2026</h1>
+      <p class="sub" style="margin-top:6px">Como o acompanhamento chegou à projeção registrada na véspera da votação.</p>
+    </div>
+    <nav class="pages" aria-label="Páginas">
+      <a href="index.html">Apuração</a>
+      <a href="pesquisas.html" aria-current="page">Pesquisas e projeção</a>
+    </nav>
+  </header>
+
+  <section class="tiles" aria-label="Resumo">
+    <div class="card tile"><div class="lbl">Pesquisas reunidas</div><div class="big" id="n-pesq">—</div><div class="note" id="periodo">—</div></div>
+    <div class="card tile"><div class="lbl">Flávio à frente em</div><div class="big"><span id="n-frente">—</span></div><div class="note">das pesquisas, em votos válidos</div></div>
+    <div class="card tile"><div class="lbl">Média da última semana</div><div class="big"><span id="media-f" class="f">—</span><small> x </small><span id="media-l" class="l">—</span></div><div class="note" id="media-nota">Flávio x Lula, votos válidos</div></div>
+    <div class="card tile"><div class="lbl">Projeção da véspera</div><div class="big"><span id="proj-c" class="f">—</span><small>%</small></div><div class="note" id="proj-faixa">Flávio, centro da faixa</div></div>
+  </section>
+
+  <section class="card" aria-labelledby="t-graf">
+    <h2 id="t-graf">Flávio nas pesquisas, dia a dia</h2>
+    <p class="note" style="margin:0">Cada ponto é uma pesquisa (percentual de Flávio nos votos válidos; Lula é o restante até 100). A linha é a média das pesquisas dos 7 dias anteriores. Acima de 50%, Flávio à frente.</p>
+    <div class="box" id="grafico" style="margin-top:10px"></div>
+    <div class="legend">
+      <span><span class="sq" style="background:var(--f)"></span>Flávio à frente</span>
+      <span><span class="sq" style="background:var(--l)"></span>Lula à frente</span>
+      <span><span class="sq" style="background:var(--muted)"></span>Empate ou média de 7 dias</span>
+    </div>
+  </section>
+
+  <div class="grid2">
+    <section class="card prose" aria-labelledby="t-metodo">
+      <h2 id="t-metodo">Como a projeção foi feita</h2>
+      <p>Durante as três semanas entre os turnos, as pesquisas registradas no TSE foram reunidas a partir de reportagens (Gazeta do Povo, CNN, Metrópoles, InfoMoney, Poder360 e outras), sempre em votos válidos. Quando a notícia só trazia votos totais, o número foi convertido, como indicado na tabela.</p>
+      <p>Na véspera, a leitura juntou quatro coisas: a média das pesquisas mais recentes, o resultado do 1º turno (Flávio 47,03% x Lula 45,16%), o histórico de que nenhum candidato virou um 2º turno presidencial desde 1989 e o fato de as pesquisas já terem errado disputas apertadas nas duas direções.</p>
+      <p>O resultado foi uma faixa, não um número: Flávio com 51,5% no centro, 50% de chance de cair entre 49,8% e 53,2% e 80% de chance entre 48,3% e 54,7%.</p>
+      <p><strong>Limites:</strong> é uma estimativa subjetiva feita com ajuda de IA, não um modelo estatístico calibrado. As pesquisas foram coletadas de notícias, então podem ter erros de transcrição; confira na fonte antes de reutilizar.</p>
+    </section>
+    <section class="card" aria-labelledby="t-chances">
+      <h2 id="t-chances">Chance de Lula virar, segundo cada fonte</h2>
+      <p class="note" style="margin:0 0 6px">Na véspera da votação. Quanto maior a barra, maior a chance de virada.</p>
+      <div id="chances"></div>
+    </section>
+  </div>
+
+  <section class="card table-wrap" aria-labelledby="t-tab">
+    <table>
+      <caption id="t-tab">Todas as pesquisas reunidas</caption>
+      <thead><tr><th scope="col">Instituto</th><th scope="col">Divulgação</th><th scope="col">Flávio</th><th scope="col">Lula</th><th scope="col" style="text-align:left">Observação</th></tr></thead>
+      <tbody id="tabela"></tbody>
+    </table>
+  </section>
+
+  <footer class="note">Projeto de estudo, sem vínculo com candidatos, partidos ou institutos. Pesquisas citadas são de seus institutos; os percentuais aqui podem ter sido convertidos para votos válidos.</footer>
+</main>
+
+<script>
+const NS = 'http://www.w3.org/2000/svg';
+const $ = (id) => document.getElementById(id);
+const br = (v, d = 1) => v == null || isNaN(v) ? '—' : Number(v).toFixed(d).replace('.', ',');
+const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const dataBR = (iso) => iso.slice(8, 10) + '/' + iso.slice(5, 7);
+let pesquisas = [], projecao = null;
+
+function el(tag, attrs, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+function txt(parent, x, y, t, anchor, color, weight) { const e = el('text', { x, y, 'text-anchor': anchor || 'start', fill: color || css('--muted'), 'font-size': 12, 'font-weight': weight || 400 }, parent); e.textContent = t; return e; }
+function tipFor(box) { let t = box.querySelector('.tip'); if (!t) { t = document.createElement('div'); t.className = 'tip'; box.appendChild(t); } return t; }
+function showTip(box, tip, ev, head, body) {
+  tip.textContent = ''; const b = document.createElement('b'); b.textContent = head; tip.appendChild(b);
+  const d = document.createElement('div'); d.textContent = body; tip.appendChild(d); tip.style.display = 'block';
+  const r = box.getBoundingClientRect(); const x = ev.clientX - r.left, y = ev.clientY - r.top;
+  tip.style.left = Math.min(Math.max(0, x + 10), box.clientWidth - tip.offsetWidth) + 'px'; tip.style.top = Math.max(0, y - 50) + 'px';
+}
+const dia = (iso) => Date.parse(iso + 'T12:00:00Z') / 86400000;
+
+// Média das pesquisas divulgadas nos 7 dias até cada data.
+function mediaMovel() {
+  const datas = [...new Set(pesquisas.map((p) => p.divulgacao))].sort();
+  return datas.map((d) => {
+    const jan = pesquisas.filter((p) => dia(p.divulgacao) <= dia(d) && dia(p.divulgacao) > dia(d) - 7);
+    return { d, f: jan.reduce((s, p) => s + p.flavio, 0) / jan.length, n: jan.length };
+  });
+}
+
+function resumo() {
+  const n = pesquisas.length;
+  $('n-pesq').textContent = n;
+  $('periodo').textContent = `de ${dataBR(pesquisas[0].divulgacao)} a ${dataBR(pesquisas[n - 1].divulgacao)} de outubro`;
+  const frente = pesquisas.filter((p) => p.flavio > p.lula).length;
+  $('n-frente').textContent = `${frente} de ${n}`;
+  const mm = mediaMovel(), ult = mm[mm.length - 1];
+  $('media-f').textContent = br(ult.f); $('media-l').textContent = br(100 - ult.f);
+  $('media-nota').textContent = `Flávio x Lula, ${ult.n} pesquisas até ${dataBR(ult.d)}`;
+  if (projecao) {
+    $('proj-c').textContent = br(projecao.flavio_central);
+    $('proj-faixa').textContent = `Flávio; 80% de chance entre ${br(projecao.faixa80[0])}% e ${br(projecao.faixa80[1])}%`;
+  }
+}
+
+function grafico() {
+  const box = $('grafico'), W = Math.max(300, box.clientWidth), H = 300, m = { t: 14, r: 16, b: 30, l: 40 };
+  const d0 = dia(pesquisas[0].divulgacao) - 1, d1 = dia(pesquisas[pesquisas.length - 1].divulgacao) + 2;
+  const lo = 47, hi = 56;
+  const x = (iso) => m.l + (dia(iso) - d0) / (d1 - d0) * (W - m.l - m.r);
+  const y = (v) => m.t + (hi - v) / (hi - lo) * (H - m.t - m.b);
+  const mm = mediaMovel(), ult = mm[mm.length - 1];
+  box.textContent = '';
+  const s = el('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%', role: 'img', 'aria-label': `Gráfico de ${pesquisas.length} pesquisas: Flávio entre ${br(Math.min(...pesquisas.map((p) => p.flavio)))}% e ${br(Math.max(...pesquisas.map((p) => p.flavio)))}%; média final ${br(ult.f)}%. A tabela abaixo tem todos os valores.` });
+  box.appendChild(s);
+  for (let v = lo; v <= hi; v++) {
+    el('line', { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), stroke: css('--grid') }, s);
+    if (v % 2 === 0) txt(s, m.l - 6, y(v) + 4, v + '%', 'end'); // rótulos em 48, 50, 52, 54, 56
+  }
+  el('line', { x1: m.l, x2: W - m.r, y1: y(50), y2: y(50), stroke: css('--muted'), 'stroke-dasharray': '4 4' }, s);
+  txt(s, W - m.r, y(50) - 6, 'empate', 'end');
+  // Faixa da projeção, no fim do período
+  if (projecao) {
+    const xp = x(pesquisas[pesquisas.length - 1].divulgacao) + 10;
+    el('rect', { x: xp, y: y(projecao.faixa80[1]), width: 10, height: y(projecao.faixa80[0]) - y(projecao.faixa80[1]), fill: css('--fg'), 'fill-opacity': .15, rx: 2 }, s);
+    el('rect', { x: xp, y: y(projecao.faixa50[1]), width: 10, height: y(projecao.faixa50[0]) - y(projecao.faixa50[1]), fill: css('--fg'), 'fill-opacity': .32 }, s);
+    el('line', { x1: xp - 2, x2: xp + 12, y1: y(projecao.flavio_central), y2: y(projecao.flavio_central), stroke: css('--fg'), 'stroke-width': 2 }, s);
+    txt(s, xp + 5, y(projecao.faixa80[1]) - 6, 'projeção', 'end');
+  }
+  // Datas no eixo
+  const datas = [...new Set(pesquisas.map((p) => p.divulgacao))].sort();
+  datas.filter((_, i) => i % Math.ceil(datas.length / (W < 500 ? 4 : 8)) === 0).forEach((d) => txt(s, x(d), H - 8, dataBR(d), 'middle'));
+  // Média móvel
+  el('path', { d: mm.map((p, i) => (i ? 'L' : 'M') + x(p.d) + ',' + y(p.f)).join(''), fill: 'none', stroke: css('--muted'), 'stroke-width': 2.5 }, s);
+  // Pontos, com pequeno deslocamento quando várias pesquisas saem no mesmo dia
+  const tip = tipFor(box), porDia = {};
+  pesquisas.forEach((p) => {
+    const k = porDia[p.divulgacao] = (porDia[p.divulgacao] || 0) + 1;
+    const cx = x(p.divulgacao) + ((k - 1) % 3 - 1) * 4;
+    const cor = p.flavio > 50 ? css('--f') : p.flavio < 50 ? css('--l') : css('--muted');
+    const c = el('circle', { cx, cy: y(p.flavio), r: 4.5, fill: cor, 'fill-opacity': .85, stroke: css('--panel'), 'stroke-width': 1 }, s);
+    c.addEventListener('mousemove', (ev) => showTip(box, tip, ev, `${p.instituto} · ${dataBR(p.divulgacao)}`, `Flávio ${br(p.flavio)}% x Lula ${br(p.lula)}%`));
+    c.addEventListener('mouseleave', () => tip.style.display = 'none');
+  });
+}
+
+function chances() {
+  const box = $('chances'); box.textContent = '';
+  if (!projecao) return;
+  for (const c of projecao.comparacao) {
+    const row = document.createElement('div'); row.className = 'chance-row';
+    const nome = document.createElement('div'); nome.textContent = c.fonte;
+    const sm = document.createElement('small'); sm.textContent = c.descricao; nome.appendChild(sm);
+    const bar = document.createElement('div'); bar.className = 'chance-bar'; bar.setAttribute('aria-hidden', 'true');
+    const fill = document.createElement('span'); fill.style.width = c.chance + '%'; bar.appendChild(fill);
+    const val = document.createElement('div'); val.className = 'val'; val.textContent = c.chance + '%';
+    row.append(nome, bar, val); box.appendChild(row);
+  }
+}
+
+function tabela() {
+  const tb = $('tabela'); tb.textContent = '';
+  for (const p of [...pesquisas].reverse()) {
+    const tr = document.createElement('tr');
+    const th = document.createElement('th'); th.scope = 'row'; th.textContent = p.instituto; tr.appendChild(th);
+    [[dataBR(p.divulgacao), ''], [br(p.flavio) + '%', p.flavio > p.lula ? 'f' : ''], [br(p.lula) + '%', p.lula > p.flavio ? 'l' : ''], [p.obs || '', 'obs']].forEach(([t, cls]) => {
+      const td = document.createElement('td'); td.textContent = t; if (cls) td.className = cls; tr.appendChild(td);
+    });
+    tb.appendChild(tr);
+  }
+}
+
+function render() { if (!pesquisas.length) return; resumo(); grafico(); chances(); tabela(); }
+window.addEventListener('resize', () => pesquisas.length && grafico());
+Promise.all([
+  fetch('data/pesquisas.json').then((r) => r.json()).then((j) => { pesquisas = j.pesquisas; }),
+  fetch('data/projecao.json').then((r) => r.json()).then((j) => { projecao = j; }),
+]).then(render).catch(() => { $('grafico').textContent = 'Não consegui carregar os dados.'; });
+</script>
+</body>
+</html>

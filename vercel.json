@@ -1,0 +1,6 @@
+{
+  "regions": ["gru1"],
+  "headers": [
+    { "source": "/api/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, s-maxage=20, stale-while-revalidate=40" }] }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+ "sobre": "Projeção registrada na véspera (24/10/2026, noite), antes da abertura das urnas. É uma estimativa subjetiva feita com ajuda de IA a partir das pesquisas, não um modelo estatístico.",
+ "registrada_em": "2026-10-24T21:30:00-03:00",
+ "flavio_central": 51.5,
+ "faixa50": [
+  49.8,
+  53.2
+ ],
+ "faixa80": [
+  48.3,
+  54.7
+ ],
+ "chance": {
+  "Flávio": 70,
+  "Lula": 30
+ },
+ "primeiro_turno": [
+  {
+   "candidato": "Flávio Bolsonaro",
+   "votos_validos": 47.03,
+   "votos": 56104503
+  },
+  {
+   "candidato": "Lula",
+   "votos_validos": 45.16,
+   "votos": 53879538
+  }
+ ],
+ "comparacao": [
+  {
+   "fonte": "Histórico desde 1989",
+   "chance": 0,
+   "tipo": "historico",
+   "descricao": "Em 7 segundos turnos presidenciais, quem liderou o 1º turno sempre venceu. Nunca houve virada."
+  },
+  {
+   "fonte": "Eurasia Group",
+   "chance": 25,
+   "tipo": "externa",
+   "descricao": "Consultoria dá 75% a Flávio (17/out, era 80%). Diz que Lula precisaria de mais de 60% dos votos dos eliminados."
+  },
+  {
+   "fonte": "[4]pp (modelo anônimo)",
+   "chance": 9,
+   "tipo": "externa",
+   "descricao": "Site 4pp.com.br dá 91% a Flávio (projeção 53,7% x 46,3%, consultada em 19/out). Autoria não identificada e metodologia não verificável; ajusta as pesquisas cerca de 3 pontos a favor de Flávio."
+  },
+  {
+   "fonte": "Plano Político (modelo)",
+   "chance": 18,
+   "tipo": "externa",
+   "descricao": "Modelo com 1º turno + pesquisas calibradas por erro histórico dá 82% a Flávio e projeção de 51,5% x 48,5% (21/out, antes do Datafolha 50 x 50)."
+  },
+  {
+   "fonte": "Polymarket (apostas)",
+   "chance": 18,
+   "tipo": "externa",
+   "descricao": "Mercado de apostas dá 82% a Flávio na véspera (24/out, US$ 195 mi negociados). Lula chegou perto de 30% após o Datafolha de 22/out e voltou a cair depois do debate."
+  },
+  {
+   "fonte": "Claude",
+   "chance": 30,
+   "tipo": "claude",
+   "descricao": "Veredito final (24/out, noite): 70% Flávio, 30% Lula. Mais cauteloso que mercados e modelos porque disputa de 2 pontos já foi errada pelas pesquisas nas duas direções."
+  }
+ ]
+}

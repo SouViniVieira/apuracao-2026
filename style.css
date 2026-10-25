@@ -1,0 +1,52 @@
+/* Estilo compartilhado pelas duas páginas. Cores de candidato: --f/--l para áreas,
+   --f-ink/--l-ink para texto (mais escuras no tema claro, para passar no contraste AA). */
+:root {
+  --bg: #f6f6f4; --panel: #ffffff; --fg: #1d1d1b; --muted: #5c5c57; --line: #dcdcd6; --grid: #e6e6e0;
+  --f: #3b78e7; --l: #e2622f; --f-ink: #2456b8; --l-ink: #b4431b; --focus: #1d1d1b;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #141414; --panel: #1d1d1d; --fg: #eeeeec; --muted: #a8a8a3; --line: #333331; --grid: #2a2a29;
+    --f: #5b93ff; --l: #ff7a4d; --f-ink: #8fb4ff; --l-ink: #ff9a75; --focus: #ffffff; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 24px max(16px, env(safe-area-inset-left)) 56px; display: grid; gap: 16px; }
+header.top { display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: flex-end; justify-content: space-between; }
+h1 { font-size: clamp(22px, 4vw, 28px); line-height: 1.2; margin: 0; font-weight: 650; }
+h2 { font-size: 17px; margin: 0 0 4px; font-weight: 650; }
+nav.pages { display: flex; gap: 6px; flex-wrap: wrap; }
+nav.pages a { text-decoration: none; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; font-size: 14px; background: var(--panel); }
+nav.pages a[aria-current="page"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.sub { color: var(--muted); font-size: 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); display: inline-block; flex: none; }
+.dot.on { background: #1f9d57; box-shadow: 0 0 0 4px rgba(31, 157, 87, .2); }
+.dot.err { background: #c53030; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px; min-width: 0; }
+.note { color: var(--muted); font-size: 14px; }
+.f { color: var(--f-ink); } .l { color: var(--l-ink); }
+button { font: inherit; font-size: 14px; background: var(--panel); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; cursor: pointer; min-height: 36px; }
+button:hover { border-color: var(--muted); }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.tile .lbl { font-size: 14px; color: var(--muted); }
+.tile .big { font-size: clamp(28px, 6vw, 38px); font-weight: 650; font-variant-numeric: tabular-nums; margin-top: 2px; }
+.tile .big small { font-size: 16px; color: var(--muted); font-weight: 500; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: 8px; }
+.sq { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.box { position: relative; }
+.tip { position: absolute; pointer-events: none; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 6px 9px; font-size: 13px; display: none; white-space: nowrap; box-shadow: 0 4px 14px rgba(0, 0, 0, .15); z-index: 2; }
+.tip b { display: block; color: var(--muted); font-weight: 500; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+caption { text-align: left; font-weight: 650; font-size: 17px; padding-bottom: 8px; }
+th, td { text-align: right; padding: 7px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+thead th { color: var(--muted); font-weight: 600; }
+td.obs { text-align: left; white-space: normal; color: var(--muted); min-width: 16rem; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+svg text { font-family: inherit; }
+.prose { max-width: 68ch; }
+.prose p, .prose ul { margin: 0 0 10px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
