@@ -25,6 +25,8 @@ jobs:
     timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -35,4 +37,6 @@ jobs:
           # Commits com a identidade do dono do repositório, para a Vercel publicar cada atualização.
           git config user.name "Vinicius Vieira"
           git config user.email "102303649+SouViniVieira@users.noreply.github.com"
+          # Um job que esperou na fila começa do histórico mais recente, não da versão em que foi criado.
+          git fetch -q origin main && git reset -q --hard origin/main
           node coleta/gravar-nuvem.mjs
