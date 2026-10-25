@@ -2,6 +2,7 @@
 // Busca Brasil + 27 UFs + exterior, normaliza e devolve num JSON só.
 // A CDN da Vercel guarda a resposta por 20s (vercel.json), então o TSE
 // recebe no máximo ~3 rodadas por minuto, não importa quantas pessoas abram a página.
+// Parâmetros fora da lista são recusados antes de consultar o TSE.
 
 const BASE = 'https://resultados.tse.jus.br/oficial';
 const UFS = ['br','ac','al','am','ap','ba','ce','df','es','go','ma','mg','ms','mt','pa','pb','pe','pi','pr','rj','rn','ro','rr','rs','sc','se','sp','to','zz'];
@@ -57,8 +58,19 @@ function normalizar(uf, j) {
   };
 }
 
+// Só estas eleições podem ser pedidas. A CDN guarda uma cópia por URL completa, então qualquer
+// parâmetro extra (?x=123) furaria o cache e faria 29 consultas novas ao TSE a cada acesso.
+const PERMITIDAS = ['6257', '6258'];
+const PRIMEIRO_TURNO = '6257';
+
 export default async function handler(req, res) {
   const ano = process.env.TSE_ANO || '2026';
+  const extras = Object.keys(req.query || {}).filter(k => k !== 'e');
+  if (extras.length || (req.query.e && !PERMITIDAS.includes(String(req.query.e)))) {
+    return res.status(400).json({ erro: 'Parâmetro inválido. Use /api/apuracao ou /api/apuracao?e=6257.' });
+  }
+  // O 1º turno já terminou: a CDN pode guardar por um dia em vez de 20 segundos.
+  if (req.query.e === PRIMEIRO_TURNO) res.setHeader('Vercel-CDN-Cache-Control', 'max-age=86400');
   try {
     const cd = req.query.e || await descobrirEleicao(ano);
     const pad = String(cd).padStart(6, '0');
