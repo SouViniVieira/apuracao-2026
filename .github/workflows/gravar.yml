@@ -9,8 +9,8 @@ on:
     paths: ['.github/workflows/gravar.yml', 'coleta/gravar-nuvem.mjs']
   workflow_dispatch:
   schedule:
-    - cron: '0 1 26 10 *'    # 22h de Brasília
-    - cron: '30 3 26 10 *'   # 0h30 de Brasília
+    - cron: '0 0 26 10 *'    # 21h de Brasília (fica na fila e começa quando o job anterior terminar)
+    - cron: '0 3 26 10 *'    # meia-noite de Brasília
 
 permissions:
   contents: write
