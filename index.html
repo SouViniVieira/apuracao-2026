@@ -17,13 +17,41 @@
 #mapa .callout:focus-visible rect, #mapa .callout.sel rect { stroke: var(--fg); stroke-width: 2.5; }
 #mapa .callout:focus { outline: none; }
 #mapa .callout { cursor: pointer; }
-.detail h3 { margin: 0; font-size: 20px; }
-.detail .pct { font-size: 28px; font-weight: 650; font-variant-numeric: tabular-nums; }
-.detail dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 12px 0 0; font-size: 14px; }
-.detail dt { color: var(--muted); }
-.detail dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
-.bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--grid); margin-top: 10px; }
+.bar { position: relative; display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--grid); margin-top: 10px; }
 .bar span { display: block; height: 100%; }
+.bar i { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--fg); opacity: .7; }
+#mapa path.uf, #mapa .callout { -webkit-tap-highlight-color: transparent; }
+/* Painel do estado: uma informação principal por bloco, do mais para o menos importante. */
+.painel { display: grid; gap: 14px; align-content: start; }
+.escolha { display: grid; gap: 4px; font-size: 14px; color: var(--muted); }
+.escolha select { font: inherit; font-size: 15px; color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; min-height: 44px; padding: 6px 10px; }
+.detail { display: grid; gap: 14px; }
+.det-head { display: flex; gap: 10px; align-items: center; }
+.det-head .badge { border: 1px solid var(--line); border-radius: 8px; padding: 3px 8px; font-weight: 700; font-size: 14px; }
+.det-head h3 { margin: 0; font-size: 22px; line-height: 1.2; flex: 1; }
+.det-head button { min-height: 36px; padding: 4px 10px; }
+.prog { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); margin-top: -6px; }
+.prog .trilho { flex: 1; height: 6px; border-radius: 3px; background: var(--grid); overflow: hidden; }
+.prog .trilho span { display: block; height: 100%; background: var(--muted); }
+.lider { justify-self: start; font-weight: 650; font-size: 15px; padding: 4px 12px; border-radius: 999px; border: 1.5px solid currentColor; }
+.duelo { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+.duelo > div:nth-child(2) { text-align: right; }
+.duelo .nome { font-size: 14px; color: var(--muted); }
+.duelo .pct { font-size: clamp(28px, 5vw, 34px); font-weight: 700; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.duelo .votos { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.duelo .bar { grid-column: 1 / -1; }
+.bloco { border-top: 1px solid var(--line); padding-top: 12px; display: grid; gap: 4px; }
+.bloco h4 { margin: 0 0 2px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 650; }
+.bloco .destaque { font-size: 18px; font-weight: 650; }
+.bloco p { margin: 0; font-size: 14px; color: var(--muted); }
+.bloco .bar { height: 8px; margin-top: 6px; }
+.mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.mini div { background: var(--bg); border-radius: 8px; padding: 8px 10px; }
+.mini b { display: block; font-size: 16px; font-variant-numeric: tabular-nums; }
+.mini span { font-size: 12px; color: var(--muted); }
+.vazio { background: var(--bg); border: 1px dashed var(--line); border-radius: 10px; padding: 14px; text-align: center; }
+.vazio b { display: block; font-size: 16px; }
+.vazio span { font-size: 14px; color: var(--muted); }
 .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
 .wait { color: var(--muted); font-size: 14px; padding: 12px 0; }
 #sync { font-variant-numeric: tabular-nums; }
@@ -97,10 +125,16 @@ html { scroll-padding-top: 170px; }
 
   <section class="card" aria-labelledby="t-mapa">
     <h2 id="t-mapa">Quem lidera em cada estado</h2>
-    <p class="note" style="margin:0">Cor mais forte, vantagem maior. Passe o mouse ou navegue com Tab para ver o resumo de um estado; clique ou aperte Enter para abrir o detalhe ao lado. A tabela no fim da página tem todos os números.</p>
+    <p class="note" style="margin:0">Toque ou clique num estado para ver o resultado dele. Cor mais forte, vantagem maior.</p>
     <div class="map-grid" style="margin-top:12px">
       <div class="box" id="mapa"></div>
-      <div class="detail" id="detalhe" aria-live="polite"></div>
+      <div class="painel" id="painel">
+        <label class="escolha">Ver resultado de
+          <select id="escolha"></select>
+        </label>
+        <div class="detail" id="detalhe"></div>
+        <p class="sr-only" id="anuncio" aria-live="polite"></p>
+      </div>
     </div>
     <div class="legend">
       <span><span class="sq" style="background:var(--f)"></span>Flávio lidera</span>
@@ -188,7 +222,7 @@ function resumo(uf) {
 function drawMapa() {
   const box = $('mapa');
   if (!mapa) { box.innerHTML = '<div class="wait">Carregando o mapa…</div>'; return; }
-  const W = mapa.w + 110, H = mapa.h;
+  const W = mapa.w + 130, H = mapa.h;
   // O mapa é redesenhado a cada consulta: guarda qual estado tinha o foco do teclado para devolvê-lo.
   const focado = box.contains(document.activeElement) ? document.activeElement.getAttribute('data-uf') : null;
   const s = svgBox(box, W, H, 'Mapa do Brasil com o candidato que lidera em cada estado', 'group');
@@ -201,15 +235,15 @@ function drawMapa() {
   // Etiquetas dos estados pequenos, em coluna à direita, sem sobreposição.
   const lista = PEQUENOS.map((uf) => ({ uf, ...mapa.uf[uf] })).sort((a, b) => a.cy - b.cy);
   let y = 0;
-  const bx = mapa.w + 34, bw = 64, bh = 28;
+  const bx = mapa.w + 34, bw = 84, bh = 34;
   for (const it of lista) {
     y = Math.max(it.cy - bh / 2, y);
     const d = dadosDe(it.uf), c = corDe(d);
     el('line', { x1: it.cx + 4, y1: it.cy, x2: bx, y2: y + bh / 2, stroke: css('--muted'), 'stroke-width': 1 }, s);
     const g = el('g', { class: 'callout' + (selecionado === it.uf ? ' sel' : ''), tabindex: 0, role: 'button', 'aria-label': it.uf + ', ' + resumo(it.uf), 'data-uf': it.uf }, s);
     el('rect', { x: bx, y, width: bw, height: bh, rx: 6 }, g);
-    el('rect', { x: bx + 6, y: y + 8, width: 12, height: 12, rx: 2, fill: c.fill, 'fill-opacity': c.op, stroke: 'none' }, g);
-    txt(g, bx + 24, y + 19, it.uf, 'start', css('--fg'), 650, 13);
+    el('rect', { x: bx + 8, y: y + 10, width: 14, height: 14, rx: 3, fill: c.fill, 'fill-opacity': c.op, stroke: 'none' }, g);
+    txt(g, bx + 30, y + 23, it.uf, 'start', css('--fg'), 650, 15);
     ligar(g, it.uf);
     y += bh + 6;
   }
@@ -217,9 +251,11 @@ function drawMapa() {
   const ey = Math.max(y + 18, H - 40), d = dadosDe('ZZ'), c = corDe(d);
   const g = el('g', { class: 'callout' + (selecionado === 'ZZ' ? ' sel' : ''), tabindex: 0, role: 'button', 'aria-label': 'EXT, ' + resumo('ZZ'), 'data-uf': 'ZZ' }, s);
   el('rect', { x: bx, y: ey, width: bw, height: bh, rx: 6 }, g);
-  el('rect', { x: bx + 6, y: ey + 8, width: 12, height: 12, rx: 2, fill: c.fill, 'fill-opacity': c.op, stroke: 'none' }, g);
-  txt(g, bx + 24, ey + 19, 'EXT', 'start', css('--fg'), 650, 13);
+  el('rect', { x: bx + 8, y: ey + 10, width: 14, height: 14, rx: 3, fill: c.fill, 'fill-opacity': c.op, stroke: 'none' }, g);
+  txt(g, bx + 30, ey + 23, 'EXT', 'start', css('--fg'), 650, 15);
   ligar(g, 'ZZ');
+  // Contorno do estado escolhido desenhado por cima, para os vizinhos não esconderem a borda.
+  if (mapa.uf[selecionado]) el('path', { d: mapa.uf[selecionado].d, fill: 'none', stroke: css('--fg'), 'stroke-width': 3, 'stroke-linejoin': 'round', 'pointer-events': 'none' }, s);
   if (focado) { const n = s.querySelector(`[data-uf="${focado}"]`); if (n) n.focus(); }
 }
 
@@ -259,50 +295,113 @@ function tipNoElemento(node, uf) {
   mostrarTip(uf, r.right - b.left, r.top + r.height / 2 - b.top);
 }
 
+// O resumo flutuante é só para mouse e teclado. No toque ele ficaria preso sobre o mapa,
+// então tocar escolhe o estado direto e, no celular, rola até o painel.
+let ultimoPonteiro = 'mouse';
 function ligar(node, uf) {
-  node.addEventListener('mousemove', (e) => { const b = $('mapa').getBoundingClientRect(); mostrarTip(uf, e.clientX - b.left, e.clientY - b.top); });
-  node.addEventListener('mouseleave', esconderTip);
+  node.addEventListener('pointerdown', (e) => { ultimoPonteiro = e.pointerType; });
+  node.addEventListener('pointermove', (e) => { if (e.pointerType !== 'mouse') return; const b = $('mapa').getBoundingClientRect(); mostrarTip(uf, e.clientX - b.left, e.clientY - b.top); });
+  node.addEventListener('pointerleave', esconderTip);
   node.addEventListener('focus', () => { if (node.matches(':focus-visible')) tipNoElemento(node, uf); });
   node.addEventListener('blur', esconderTip);
-  const escolher = () => { selecionado = selecionado === uf ? 'BR' : uf; render(); };
-  node.addEventListener('click', escolher);
-  node.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); escolher(); } });
+  node.addEventListener('click', () => { esconderTip(); selecionar(uf, ultimoPonteiro === 'mouse' ? 'mouse' : 'toque'); });
+  node.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selecionar(uf, 'teclado'); } });
+}
+
+function selecionar(uf, origem) {
+  selecionado = uf;
+  render();
+  $('anuncio').textContent = 'Mostrando ' + resumo(uf);
+  if (origem === 'toque' && matchMedia('(max-width: 760px)').matches) {
+    const det = $('detalhe');
+    if (det.getBoundingClientRect().top > innerHeight * 0.45) {
+      det.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+    }
+  }
+}
+
+const ordemUFs = () => ['BR', ...Object.keys(UF_NOME).filter((u) => u !== 'BR' && u !== 'ZZ').sort((a, b) => UF_NOME[a].localeCompare(UF_NOME[b], 'pt-BR')), 'ZZ'];
+function montarEscolha() {
+  const sel = $('escolha');
+  for (const uf of ordemUFs()) { const o = document.createElement('option'); o.value = uf; o.textContent = UF_NOME[uf]; sel.appendChild(o); }
+  sel.addEventListener('change', () => selecionar(sel.value, 'lista'));
+}
+
+// Cria um elemento com classe e texto e já o coloca no pai.
+function h(tag, cls, texto, pai) { const e = document.createElement(tag); if (cls) e.className = cls; if (texto != null) e.textContent = texto; if (pai) pai.appendChild(e); return e; }
+function barra(pai, lula, flavio) {
+  const b = h('div', 'bar', null, pai); b.setAttribute('aria-hidden', 'true');
+  h('span', null, null, b).style.cssText = `width:${lula}%;background:var(--l)`;
+  h('span', null, null, b).style.cssText = `width:${flavio}%;background:var(--f);margin-left:auto`;
+  h('i', null, null, b);
+  return b;
 }
 
 function drawDetalhe() {
   const uf = selecionado, d = dadosDe(uf), p = primeiroDe(uf), box = $('detalhe');
+  const voltarComFoco = document.activeElement && document.activeElement.id === 'voltar';
   box.textContent = '';
-  const h = document.createElement('h3'); h.textContent = UF_NOME[uf]; box.appendChild(h);
-  const sub = document.createElement('p'); sub.className = 'note'; sub.style.margin = '2px 0 0';
-  sub.textContent = d ? `${br(d.apuradas_pct)}% das seções apuradas` + (d.hora ? ` · TSE ${d.hora}` : '') : 'Carregando…';
-  box.appendChild(sub);
+
+  // 1. Qual lugar e quanto já foi apurado
+  const head = h('div', 'det-head', null, box);
+  h('span', 'badge', uf === 'ZZ' ? 'EXT' : uf, head).setAttribute('aria-hidden', 'true');
+  h('h3', null, UF_NOME[uf], head);
+  if (uf !== 'BR') {
+    const v = h('button', null, 'Ver Brasil', head); v.type = 'button'; v.id = 'voltar';
+    v.addEventListener('click', () => { selecionar('BR', 'botao'); $('escolha').focus(); });
+    if (voltarComFoco) v.focus();
+  }
+  const prog = h('div', 'prog', null, box);
+  const tr = h('div', 'trilho', null, prog); tr.setAttribute('aria-hidden', 'true');
+  h('span', null, null, tr).style.width = (d ? d.apuradas_pct : 0) + '%';
+  h('span', null, d ? `${br(d.apuradas_pct, 1)}% apurado` + (temVotos(d) && d.hora ? ` · ${d.hora}` : '') : 'Carregando…', prog);
+
   if (temVotos(d)) {
-    const row = document.createElement('div'); row.style.display = 'flex'; row.style.justifyContent = 'space-between'; row.style.marginTop = '10px';
-    row.innerHTML = '<div><div class="note">Lula</div><div class="pct l"></div></div><div style="text-align:right"><div class="note">Flávio</div><div class="pct f"></div></div>';
-    row.querySelector('.pct.f').textContent = br(d.flavio.pct) + '%';
-    row.querySelector('.pct.l').textContent = br(d.lula.pct) + '%';
-    box.appendChild(row);
-    const bar = document.createElement('div'); bar.className = 'bar'; bar.setAttribute('aria-hidden', 'true');
-    bar.innerHTML = `<span style="width:${d.lula.pct}%;background:var(--l)"></span><span style="width:${d.flavio.pct}%;background:var(--f);margin-left:auto"></span>`;
-    box.appendChild(bar);
+    // 2. Quem lidera e por quanto
+    const dp = d.flavio.pct - d.lula.pct;
+    if (Math.abs(dp) < 0.005) h('div', 'lider', 'Empate', box);
+    else h('div', 'lider ' + (dp > 0 ? 'f' : 'l'), `${dp > 0 ? 'Flávio' : 'Lula'} lidera por ${br(Math.abs(dp), 1)} pts`, box);
+
+    // 3. Os dois números principais
+    const duelo = h('div', 'duelo', null, box);
+    [['Lula', d.lula, 'l'], ['Flávio', d.flavio, 'f']].forEach(([nome, c, k]) => {
+      const lado = h('div', null, null, duelo);
+      h('div', 'nome', nome, lado);
+      h('div', 'pct ' + k, br(c.pct) + '%', lado);
+      h('div', 'votos', mil(c.votos) + ' votos', lado);
+    });
+    barra(duelo, d.lula.pct, d.flavio.pct);
   } else {
-    const w = document.createElement('p'); w.className = 'wait'; w.textContent = 'Os votos saem a partir das 17h.'; box.appendChild(w);
+    const vz = h('div', 'vazio', null, box);
+    h('b', null, 'Aguardando os votos', vz);
+    h('span', null, 'Os primeiros resultados saem a partir das 17h.', vz);
   }
-  const dl = document.createElement('dl');
-  const add = (k, v) => { const dt = document.createElement('dt'); dt.textContent = k; const dd = document.createElement('dd'); dd.textContent = v; dl.append(dt, dd); };
-  if (temVotos(d)) { add('Votos de Lula', mil(d.lula.votos)); add('Votos de Flávio', mil(d.flavio.votos)); }
-  if (p) {
-    add('1º turno, Lula x Flávio', `${br(p.lula.pct, 1)}% x ${br(p.flavio.pct, 1)}%`);
-    add('1º turno, só os dois', `${br(100 - doisLados(p), 1)}% x ${br(doisLados(p), 1)}%`);
+
+  // 4. O que mudou desde o 1º turno (contando só os dois, porque no 1º havia outros candidatos)
+  if (p && p.flavio && p.lula) {
+    const f1 = doisLados(p), bl = h('div', 'bloco', null, box);
+    h('h4', null, temVotos(d) ? 'Desde o 1º turno' : 'No 1º turno', bl);
+    const m = mudanca(uf);
+    if (m != null) {
+      if (Math.abs(m) < 0.05) h('div', 'destaque', 'Igual ao 1º turno', bl);
+      else h('div', 'destaque ' + (m > 0 ? 'f' : 'l'), `${m > 0 ? 'Flávio' : 'Lula'} ganhou ${br(Math.abs(m), 1)} pts`, bl);
+      h('p', null, `No 1º turno, contando só os dois: Lula ${br(100 - f1, 1)}% e Flávio ${br(f1, 1)}%.`, bl);
+    } else {
+      const lider = f1 >= 50 ? 'Flávio' : 'Lula';
+      h('div', 'destaque ' + (f1 >= 50 ? 'f' : 'l'), `${lider} ficou na frente`, bl);
+      h('p', null, `Contando só os dois: Lula ${br(100 - f1, 1)}% e Flávio ${br(f1, 1)}%.`, bl);
+      barra(bl, 100 - f1, f1);
+    }
   }
-  const m = mudanca(uf);
-  if (m != null) add('Mudança de Flávio', (m >= 0 ? '+' : '') + br(m, 1) + ' pts');
-  if (temVotos(d) && d.abstencao_pct != null) add('Abstenção', br(d.abstencao_pct, 1) + '%');
-  box.appendChild(dl);
-  if (selecionado !== 'BR') {
-    const b = document.createElement('button'); b.type = 'button'; b.textContent = 'Voltar para o Brasil'; b.style.marginTop = '12px';
-    b.addEventListener('click', () => { selecionado = 'BR'; render(); });
-    box.appendChild(b);
+
+  // 5. Números de apoio
+  if (temVotos(d)) {
+    const bl = h('div', 'bloco', null, box);
+    h('h4', null, 'Outros números', bl);
+    const mini = h('div', 'mini', null, bl);
+    [['Abstenção', d.abstencao_pct], ['Brancos', d.brancos_pct], ['Nulos', d.nulos_pct]].forEach(([k, v]) => {
+      const c = h('div', null, null, mini); h('b', null, v == null ? '—' : br(v, 1) + '%', c); h('span', null, k, c);
+    });
   }
 }
 
@@ -357,8 +456,7 @@ function drawEvol(h) {
 
 function drawTabela() {
   const tb = $('tabela'); tb.textContent = '';
-  const ufs = ['BR', ...Object.keys(UF_NOME).filter((u) => u !== 'BR' && u !== 'ZZ').sort((a, b) => UF_NOME[a].localeCompare(UF_NOME[b], 'pt-BR')), 'ZZ'];
-  for (const uf of ufs) {
+  for (const uf of ordemUFs()) {
     const d = dadosDe(uf), m = mudanca(uf), tr = document.createElement('tr');
     const th = document.createElement('th'); th.scope = 'row'; th.textContent = UF_NOME[uf]; if (uf === 'BR') th.style.fontWeight = '700'; tr.appendChild(th);
     const cells = [d ? br(d.apuradas_pct, 1) + '%' : '—', temVotos(d) ? br(d.flavio.pct) + '%' : '—', temVotos(d) ? br(d.lula.pct) + '%' : '—', m == null ? '—' : (m >= 0 ? '+' : '') + br(m, 1) + ' pts'];
@@ -381,6 +479,7 @@ function render() {
     const dv = b.flavio.votos - b.lula.votos, dp = b.flavio.pct - b.lula.pct;
     $('dif').textContent = `${dv >= 0 ? 'Flávio' : 'Lula'} à frente por ${br(Math.abs(dp))} pts (${mil(Math.abs(dv))} votos)`;
   } else $('dif').textContent = 'Os votos começam a sair às 17h.';
+  $('escolha').value = selecionado;
   drawMapa(); drawDetalhe(); drawRegua(tem ? b.flavio.pct : null); drawEvol(historico()); drawTabela();
 }
 
@@ -430,6 +529,7 @@ async function carregarPrimeiro() {
 }
 
 $('sync').addEventListener('click', atualizarAgora);
+montarEscolha();
 $('mapa').addEventListener('mouseleave', esconderTip);
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') esconderTip(); });
 window.addEventListener('resize', render);
