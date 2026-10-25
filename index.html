@@ -26,6 +26,9 @@
 .bar span { display: block; height: 100%; }
 .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
 .wait { color: var(--muted); font-size: 14px; padding: 12px 0; }
+#sync { font-variant-numeric: tabular-nums; }
+#sync[aria-disabled="true"] { color: var(--muted); cursor: not-allowed; }
+#sync[aria-disabled="true"]:hover { border-color: var(--line); }
 /* Placar fixo no topo: o resultado do Brasil fica sempre à vista enquanto a pessoa explora o mapa. */
 /* scroll-padding evita que o placar cubra o elemento focado ao navegar com Tab (WCAG 2.4.11). */
 html { scroll-padding-top: 170px; }
@@ -381,7 +384,10 @@ function render() {
   drawMapa(); drawDetalhe(); drawRegua(tem ? b.flavio.pct : null); drawEvol(historico()); drawTabela();
 }
 
+let consultando = false;
 async function atualizar() {
+  if (consultando) return;
+  consultando = true;
   try {
     const r = await fetch('api/apuracao', { cache: 'no-store' });
     const j = await r.json();
@@ -397,8 +403,25 @@ async function atualizar() {
   } catch (e) {
     $('dot').className = 'dot err';
     $('status').textContent = 'Não consegui consultar o TSE agora (' + e.message + '). Tento de novo em 30 segundos.';
-  }
+  } finally { consultando = false; }
   render();
+}
+
+// "Atualizar agora" tem uma pausa de 20 s entre cliques, o mesmo tempo do cache da Vercel:
+// clicar antes disso só traria a mesma resposta. Usa aria-disabled em vez de disabled para
+// o botão não perder o foco do teclado durante a pausa.
+const PAUSA = 20;
+let liberaEm = 0;
+function contarPausa() {
+  const b = $('sync'), s = Math.ceil((liberaEm - Date.now()) / 1000);
+  if (s > 0) { b.setAttribute('aria-disabled', 'true'); b.textContent = `Atualizado · de novo em ${s} s`; setTimeout(contarPausa, 1000); }
+  else { b.removeAttribute('aria-disabled'); b.textContent = 'Atualizar agora'; }
+}
+function atualizarAgora() {
+  if (Date.now() < liberaEm || consultando) return;
+  liberaEm = Date.now() + PAUSA * 1000;
+  contarPausa();
+  atualizar();
 }
 
 // 1º turno: carregado uma vez, para a comparação por estado.
@@ -406,7 +429,7 @@ async function carregarPrimeiro() {
   try { const r = await fetch('api/apuracao?e=6257'); if (r.ok) { primeiro = await r.json(); render(); } } catch {}
 }
 
-$('sync').addEventListener('click', atualizar);
+$('sync').addEventListener('click', atualizarAgora);
 $('mapa').addEventListener('mouseleave', esconderTip);
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') esconderTip(); });
 window.addEventListener('resize', render);
