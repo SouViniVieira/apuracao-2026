@@ -1,3 +1,5 @@
+// Cópia local de segurança. O gravador principal roda no GitHub Actions (gravar-nuvem.mjs);
+// com SO_LOCAL=1 este aqui só guarda o arquivo bruto, sem mexer em data/historico.json nem publicar.
 // Grava o histórico da apuração: consulta o site publicado (que usa o cache da Vercel, então
 // não gera consultas extras ao TSE) a cada 30 s e guarda uma linha por parcial nova.
 // A cada 6 minutos, se houver parciais novas, gera data/historico.json e publica (commit + push),
@@ -44,6 +46,7 @@ function montarHistorico() {
 }
 
 function publicar(motivo) {
+  if (process.env.SO_LOCAL) return;
   const l = linhas;
   if (l === publicadas) return;
   try {

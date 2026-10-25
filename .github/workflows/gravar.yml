@@ -1,0 +1,38 @@
+# Grava o histórico da apuração nos servidores do GitHub, sem depender de nenhum computador ligado.
+# Começa ao publicar este arquivo; os horários abaixo continuam a gravação se o primeiro job
+# chegar ao limite de tempo do GitHub (6 h) antes do fim da apuração.
+name: Gravar apuração
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/gravar.yml', 'coleta/gravar-nuvem.mjs']
+  workflow_dispatch:
+  schedule:
+    - cron: '0 1 26 10 *'    # 22h de Brasília
+    - cron: '30 3 26 10 *'   # 0h30 de Brasília
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gravar-apuracao
+  cancel-in-progress: false
+
+jobs:
+  gravar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Gravar
+        env:
+          MINUTOS: '335'
+        run: |
+          # Commits com a identidade do dono do repositório, para a Vercel publicar cada atualização.
+          git config user.name "Vinicius Vieira"
+          git config user.email "102303649+SouViniVieira@users.noreply.github.com"
+          node coleta/gravar-nuvem.mjs

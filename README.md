@@ -46,7 +46,7 @@ O resultado foi uma faixa para Flávio: 51,5% no centro, 50% de chance entre 49,
 
 A tendência estima o resultado final estado a estado: em cada estado, o que falta apurar segue o que já foi apurado lá; estados ainda sem votos seguem o 1º turno mais a mudança média dos que já começaram. Corrige a ordem de chegada entre estados (Sul e Sudeste antes do Nordeste), mas não as diferenças dentro de um mesmo estado. O código está em `comum.js`.
 
-O histórico foi gravado por `coleta/gravar.mjs`, que consultou o próprio site a cada 30 segundos durante a noite (sem consultas extras ao TSE) e publicou `data/historico.json` a cada 6 minutos.
+O histórico foi gravado no GitHub Actions (`.github/workflows/gravar.yml` e `coleta/gravar-nuvem.mjs`), sem depender de nenhum computador ligado: o job consultou o próprio site a cada 30 segundos (sem consultas extras ao TSE) e publicou `data/historico.json` a cada 6 minutos. `coleta/gravar.mjs` guardou uma cópia local de segurança.
 
 ## Rodar
 
