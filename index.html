@@ -21,6 +21,15 @@
 .bar span { display: block; height: 100%; }
 .bar i { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--fg); opacity: .7; }
 #mapa path.uf, #mapa .callout { -webkit-tap-highlight-color: transparent; }
+/* Tendência */
+.tend { display: grid; gap: 2px; }
+.tend .destaque { font-size: 20px; font-weight: 700; }
+.tend p { margin: 0; font-size: 14px; color: var(--muted); }
+.sq-r { border-radius: 50%; }
+.sq-d { background: transparent; border: 2px solid; transform: rotate(45deg) scale(.85); border-radius: 1px; }
+details.como { margin-top: 10px; font-size: 14px; }
+details.como summary { cursor: pointer; color: var(--fg); font-weight: 600; min-height: 32px; display: flex; align-items: center; }
+details.como p { color: var(--muted); margin: 6px 0 0; }
 /* Painel do estado: uma informação principal por bloco, do mais para o menos importante. */
 .painel { display: grid; gap: 14px; align-content: start; }
 .escolha { display: grid; gap: 4px; font-size: 14px; color: var(--muted); }
@@ -145,18 +154,27 @@ html { scroll-padding-top: 170px; }
 
   <div class="grid2">
     <section class="card" aria-labelledby="t-regua">
-      <h2 id="t-regua">Resultado x projeção da véspera</h2>
-      <p class="note" style="margin:0">Faixa cinza: projeção registrada em 24/10 (centro Flávio 51,5 x Lula 48,5). A bolinha é a parcial. <a href="pesquisas.html">Como a projeção foi feita</a>.</p>
+      <h2 id="t-regua">Para onde a apuração está indo</h2>
+      <div class="tend" id="tend"></div>
       <div class="box" id="regua" style="margin-top:10px"></div>
       <div class="legend">
-        <span><span class="sq" style="background:var(--fg);opacity:.35"></span>50% de chance de cair aqui</span>
+        <span><span class="sq sq-r" style="background:var(--muted)"></span>Parcial agora</span>
+        <span><span class="sq sq-d" style="border-color:var(--fg)"></span>Tendência</span>
+        <span><span class="sq" style="background:var(--fg);opacity:.35"></span>Projeção da véspera (50% de chance)</span>
         <span><span class="sq" style="background:var(--fg);opacity:.18"></span>80% de chance</span>
       </div>
+      <details class="como">
+        <summary>Como a tendência é calculada</summary>
+        <p>Em cada estado, o que falta apurar segue o que já foi apurado lá. Estados ainda sem votos seguem o resultado do 1º turno, ajustado pela mudança média vista nos estados que já começaram. O total de votos esperado em cada estado vem do eleitorado das seções já apuradas.</p>
+        <p>Isso corrige o principal problema da parcial: a ordem de chegada dos votos entre os estados. Não corrige diferenças dentro de um mesmo estado (capital antes do interior, por exemplo), então a tendência é instável no começo e fica mais confiável conforme a apuração avança. É uma conta simples, não uma previsão oficial.</p>
+        <p>A projeção da véspera foi registrada em 24/10, antes de qualquer voto. <a href="pesquisas.html">Como ela foi feita</a>.</p>
+      </details>
     </section>
     <section class="card" aria-labelledby="t-evol">
       <h2 id="t-evol">Evolução conforme as seções são apuradas</h2>
       <p class="note" style="margin:0">Em 2022, Bolsonaro liderou até cerca de 67% das urnas e Lula virou depois: a ordem de chegada muda a liderança parcial. O gráfico guarda as parciais vistas neste navegador.</p>
       <div class="box" id="evol" style="margin-top:10px"></div>
+      <div class="legend"><span>Linha cheia: parcial</span><span>Tracejada: tendência naquele momento</span></div>
     </section>
   </div>
 
@@ -405,14 +423,55 @@ function drawDetalhe() {
   }
 }
 
-function drawRegua(fv) {
+// Tendência do resultado final, estado a estado. Em cada estado, o que falta apurar segue o que
+// já foi apurado lá; estados sem votos seguem o 1º turno (só os dois) mais a mudança média dos
+// estados que já começaram. Corrige a ordem de chegada entre estados, não a de dentro de cada um.
+function tendencia(atual, prim) {
+  if (!atual || !prim || !temVotos(atual.brasil)) return null;
+  const linhas = [];
+  let somaMud = 0, pesoMud = 0, comVotos = 0;
+  for (const uf of Object.keys(UF_NOME)) {
+    if (uf === 'BR') continue;
+    const d = (atual.estados || []).find((e) => e.uf === uf), p = (prim.estados || []).find((e) => e.uf === uf);
+    if (!p || doisLados(p) == null) continue;
+    const frac = d && d.eleitorado ? d.eleitorado_apurado / d.eleitorado : 0;
+    const tem = temVotos(d) && frac > 0;
+    if (tem) { const peso = d.flavio.votos + d.lula.votos; somaMud += (doisLados(d) - doisLados(p)) * peso; pesoMud += peso; comVotos++; }
+    linhas.push({ d, p, frac, tem });
+  }
+  const mud = pesoMud ? somaMud / pesoMud : 0;
+  let total = 0, flavio = 0;
+  for (const x of linhas) {
+    const base = x.p.validos || (x.p.flavio.votos + x.p.lula.votos);
+    // Com menos de 10% apurado, a conta "votos / fração" oscila demais: usa o tamanho do 1º turno.
+    const esperado = x.tem && x.frac >= 0.1 ? (x.d.flavio.votos + x.d.lula.votos) / x.frac : base;
+    const share = x.tem ? doisLados(x.d) : Math.min(100, Math.max(0, doisLados(x.p) + mud));
+    total += esperado; flavio += esperado * share / 100;
+  }
+  return total ? { f: 100 * flavio / total, mud, comVotos, estados: linhas.length } : null;
+}
+
+function drawTendencia(t, b) {
+  const box = $('tend'); box.textContent = '';
+  if (!t) {
+    h('div', 'destaque', 'Aguardando os votos', box);
+    h('p', null, 'A partir das 17h, aqui aparece onde o resultado deve terminar, conforme os estados vão sendo apurados.', box);
+    return;
+  }
+  const lider = t.f >= 50 ? 'Flávio' : 'Lula', k = t.f >= 50 ? 'f' : 'l';
+  h('div', 'destaque ' + k, `Tendência: ${lider} termina com ${br(Math.max(t.f, 100 - t.f), 1)}%`, box);
+  const fase = b.apuradas_pct < 30 ? 'Ainda instável: poucos votos apurados.' : b.apuradas_pct < 80 ? 'Fica mais confiável conforme a apuração avança.' : 'Com quase tudo apurado, a tendência já é bem firme.';
+  h('p', null, `Lula ${br(100 - t.f, 1)}% x Flávio ${br(t.f, 1)}%, com ${t.comVotos} de ${t.estados} locais com votos. ${fase}`, box);
+}
+
+function drawRegua(fv, tf) {
   const box = $('regua');
   if (!projecao) { box.textContent = ''; return; }
   const P = { central: projecao.flavio_central, p25: projecao.faixa50[0], p75: projecao.faixa50[1], p10: projecao.faixa80[0], p90: projecao.faixa80[1] };
-  const W = Math.max(300, box.clientWidth), H = 100, m = 8;
-  const dd = Math.ceil(Math.max(8, Math.abs(P.p10 - 50) + 2, Math.abs(P.p90 - 50) + 2, fv != null ? Math.abs(fv - 50) + 1 : 0));
+  const W = Math.max(300, box.clientWidth), H = 122, m = 8;
+  const dd = Math.ceil(Math.max(8, Math.abs(P.p10 - 50) + 2, Math.abs(P.p90 - 50) + 2, fv != null ? Math.abs(fv - 50) + 1 : 0, tf != null ? Math.abs(tf - 50) + 1 : 0));
   const x = (v) => m + (v - (50 - dd)) / (2 * dd) * (W - 2 * m);
-  const s = svgBox(box, W, H, `Projeção da véspera: Flávio entre ${br(P.p10, 1)}% e ${br(P.p90, 1)}%, centro ${br(P.central, 1)}%` + (fv != null ? `. Parcial agora: Flávio ${br(fv)}%` : ''));
+  const s = svgBox(box, W, H, `Projeção da véspera: Flávio entre ${br(P.p10, 1)}% e ${br(P.p90, 1)}%, centro ${br(P.central, 1)}%` + (fv != null ? `. Parcial agora: Flávio ${br(fv)}%` : '') + (tf != null ? `. Tendência: Flávio ${br(tf, 1)}%` : ''));
   const by = 30, bh = 22, F = css('--f'), L = css('--l'), FG = css('--fg');
   el('rect', { x: x(50 - dd), y: by, width: x(50) - x(50 - dd), height: bh, fill: L, 'fill-opacity': .14 }, s);
   el('rect', { x: x(50), y: by, width: x(50 + dd) - x(50), height: bh, fill: F, 'fill-opacity': .14 }, s);
@@ -428,7 +487,14 @@ function drawRegua(fv) {
   txt(s, x(50 + dd), yb, `Flávio ${n(50 + dd)} x ${n(50 - dd)}`, 'end');
   if (fv != null) {
     el('circle', { cx: x(fv), cy: by + bh / 2, r: 7, fill: fv >= 50 ? F : L, stroke: css('--panel'), 'stroke-width': 2 }, s);
-    txt(s, x(fv), yb + 18, `agora: Flávio ${br(fv)} x Lula ${br(100 - fv)}`, 'middle', FG, 600);
+    const ax = Math.min(Math.max(x(fv), 80), W - 80);
+    txt(s, ax, yb + 18, `agora: Flávio ${br(fv, 1)}`, 'middle', FG, 600);
+  }
+  if (tf != null) {
+    const cx = x(tf), cy = by + bh / 2, r = 8;
+    el('path', { d: `M${cx},${cy - r}L${cx + r},${cy}L${cx},${cy + r}L${cx - r},${cy}Z`, fill: css('--panel'), stroke: tf >= 50 ? F : L, 'stroke-width': 3 }, s);
+    const tx = Math.min(Math.max(cx, 80), W - 80);
+    txt(s, tx, yb + 36, `tendência: Flávio ${br(tf, 1)}`, 'middle', tf >= 50 ? css('--f-ink') : css('--l-ink'), 700);
   }
 }
 
@@ -436,7 +502,7 @@ function drawEvol(h) {
   const box = $('evol');
   if (!h.length) { box.innerHTML = '<div class="wait">Aguardando as primeiras parciais, a partir das 17h.</div>'; return; }
   const W = Math.max(280, box.clientWidth), H = 230, m = { t: 10, r: 14, b: 26, l: 36 };
-  const vals = h.flatMap((p) => [p.f, p.l]);
+  const vals = h.flatMap((p) => p.t != null ? [p.f, p.l, p.t, 100 - p.t] : [p.f, p.l]);
   const lo = Math.min(44, Math.floor(Math.min(...vals)) - 1), hi = Math.max(56, Math.ceil(Math.max(...vals)) + 1);
   const x = (a) => m.l + a / 100 * (W - m.l - m.r), y = (v) => m.t + (hi - v) / (hi - lo) * (H - m.t - m.b);
   const ult = h[h.length - 1];
@@ -444,11 +510,15 @@ function drawEvol(h) {
   for (let v = Math.ceil(lo / 2) * 2; v <= hi; v += 2) { el('line', { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), stroke: css('--grid') }, s); txt(s, m.l - 6, y(v) + 4, v + '%', 'end'); }
   el('line', { x1: m.l, x2: W - m.r, y1: y(50), y2: y(50), stroke: css('--muted'), 'stroke-dasharray': '4 4' }, s);
   [0, 25, 50, 75, 100].forEach((a) => txt(s, x(a), H - 6, a + '%', 'middle'));
+  const comT = h.filter((p) => p.t != null);
+  [[(p) => p.t, css('--f')], [(p) => 100 - p.t, css('--l')]].forEach(([val, c]) => {
+    if (comT.length > 1) el('path', { d: comT.map((p, i) => (i ? 'L' : 'M') + x(p.a) + ',' + y(val(p))).join(''), fill: 'none', stroke: c, 'stroke-width': 1.5, 'stroke-dasharray': '5 4', opacity: .8 }, s);
+  });
   [['f', css('--f')], ['l', css('--l')]].forEach(([k, c]) => {
     el('path', { d: h.map((p, i) => (i ? 'L' : 'M') + x(p.a) + ',' + y(p[k])).join(''), fill: 'none', stroke: c, 'stroke-width': 2 }, s);
     h.forEach((p) => {
       const ci = el('circle', { cx: x(p.a), cy: y(p[k]), r: 3.5, fill: c }, s);
-      ci.addEventListener('mousemove', (ev) => showTip(box, tip, ev, `${br(p.a)}% apurado · ${p.h || ''}`, `Flávio ${br(p.f)}% · Lula ${br(p.l)}%`));
+      ci.addEventListener('mousemove', (ev) => showTip(box, tip, ev, `${br(p.a)}% apurado · ${p.h || ''}`, `Flávio ${br(p.f)}% · Lula ${br(p.l)}%` + (p.t != null ? ` · tendência Flávio ${br(p.t, 1)}%` : '')));
       ci.addEventListener('mouseleave', () => tip.style.display = 'none');
     });
   });
@@ -480,7 +550,8 @@ function render() {
     $('dif').textContent = `${dv >= 0 ? 'Flávio' : 'Lula'} à frente por ${br(Math.abs(dp))} pts (${mil(Math.abs(dv))} votos)`;
   } else $('dif').textContent = 'Os votos começam a sair às 17h.';
   $('escolha').value = selecionado;
-  drawMapa(); drawDetalhe(); drawRegua(tem ? b.flavio.pct : null); drawEvol(historico()); drawTabela();
+  drawMapa(); drawDetalhe(); const t = tendencia(ultimo, primeiro);
+  drawTendencia(t, b); drawRegua(tem ? b.flavio.pct : null, t ? t.f : null); drawEvol(historico()); drawTabela();
 }
 
 let consultando = false;
@@ -495,7 +566,11 @@ async function atualizar() {
     const b = j.brasil;
     if (temVotos(b)) {
       const h = historico();
-      if (!h.length || h[h.length - 1].a !== b.apuradas_pct) { h.push({ a: b.apuradas_pct, f: b.flavio.pct, l: b.lula.pct, h: b.hora }); salvarHist(h); }
+      if (!h.length || h[h.length - 1].a !== b.apuradas_pct) {
+        const t = tendencia(j, primeiro);
+        h.push({ a: b.apuradas_pct, f: b.flavio.pct, l: b.lula.pct, h: b.hora, t: t ? Math.round(t.f * 100) / 100 : null });
+        salvarHist(h);
+      }
     }
     $('dot').className = 'dot on';
     $('status').textContent = `Ao vivo · última consulta às ${new Date().toLocaleTimeString('pt-BR')}` + (j.falhas && j.falhas.length ? ` · ${j.falhas.length} estado(s) sem resposta` : '');

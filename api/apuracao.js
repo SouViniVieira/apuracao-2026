@@ -54,7 +54,11 @@ function normalizar(uf, j) {
     lula: lula ? { votos: lula.votos, pct: lula.pct } : null,
     abstencao_pct: pctNum(e.pa),
     brancos_pct: pctNum(v.pvb),
-    nulos_pct: pctNum(v.ptvn)
+    nulos_pct: pctNum(v.ptvn),
+    // Para a tendência: votos válidos já contados, eleitorado total e eleitorado das seções já apuradas.
+    validos: num(v.vv),
+    eleitorado: num(e.te),
+    eleitorado_apurado: num(e.est)
   };
 }
 
