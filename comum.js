@@ -48,7 +48,8 @@ function expandirPonto(ponto, eleitorado) {
 // Pontos do histórico publicado já com a tendência de cada momento.
 async function carregarHistorico(prim) {
   try {
-    const r = await fetch('data/historico.json', { cache: 'no-store' });
+    // no-cache revalida com ETag: entre uma publicação e outra a resposta é um 304 vazio.
+    const r = await fetch('data/historico.json', { cache: 'no-cache' });
     if (!r.ok) return null;
     const j = await r.json();
     return j.pontos.map((p) => {
