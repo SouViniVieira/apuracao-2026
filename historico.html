@@ -131,6 +131,8 @@ function el(tag, attrs, parent) { const e = document.createElementNS(NS, tag); f
 function txt(parent, x, y, t, anchor, color, weight, size) { const e = el('text', { x, y, 'text-anchor': anchor || 'start', fill: color || css('--muted'), 'font-size': size || 12, 'font-weight': weight || 400 }, parent); e.textContent = t; return e; }
 function h(tag, cls, texto, pai) { const e = document.createElement(tag); if (cls) e.className = cls; if (texto != null) e.textContent = texto; if (pai) pai.appendChild(e); return e; }
 const lider = (f) => f >= 50 ? 'Flávio' : 'Lula';
+// Intervalo sem parciais novas que conta como pausa da divulgação (a prorrogação até as 19h).
+const PAUSA = 30 * 60e3;
 const final = () => pontos.length && pontos[pontos.length - 1].a >= 99.99;
 
 // ---------- Momentos ----------
@@ -140,6 +142,7 @@ function momentos() {
   const p0 = P[0];
   m.push({ i: 0, titulo: 'Saem os primeiros votos', det: `${br(p0.a, 2)}% apurado: ${lider(p0.f)} na frente com ${br(Math.max(p0.f, p0.l))}%.` });
   for (let i = 1; i < P.length; i++) {
+    if (Date.parse(P[i].quando) - Date.parse(P[i - 1].quando) > PAUSA) m.push({ i, titulo: 'A apuração recomeça depois da prorrogação', det: `A votação foi estendida até as 19h em todo o país, e a divulgação ficou parada das ${horaBR(P[i - 1].quando)} às ${horaBR(P[i].quando)}, em ${br(P[i - 1].a, 2)}% apurado.` });
     if ((P[i].f >= 50) !== (P[i - 1].f >= 50)) m.push({ i, titulo: `${lider(P[i].f)} passa à frente na parcial`, det: `Com ${br(P[i].a)}% apurado: Lula ${br(P[i].l)}% x Flávio ${br(P[i].f)}%.` });
   }
   for (const marco of [25, 50, 75, 90]) {
@@ -255,12 +258,22 @@ function drawGrafico() {
   box.appendChild(s);
   for (let v = Math.ceil(lo / 2) * 2; v <= hi; v += 2) { el('line', { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), stroke: css('--grid') }, s); txt(s, m.l - 6, y(v) + 4, v + '%', 'end'); }
   el('line', { x1: m.l, x2: W - m.r, y1: y(50), y2: y(50), stroke: css('--muted'), 'stroke-dasharray': '4 4' }, s);
+  // Pausas da divulgação: faixa sombreada, e as linhas não atravessam o intervalo.
+  for (let i = 1; i < ts.length; i++) if (ts[i] - ts[i - 1] > PAUSA) {
+    el('rect', { x: x(ts[i - 1]), y: m.t, width: x(ts[i]) - x(ts[i - 1]), height: H - m.t - m.b, fill: css('--fg'), 'fill-opacity': .07 }, s);
+    txt(s, (x(ts[i - 1]) + x(ts[i])) / 2, m.t + 14, 'votação prorrogada', 'middle', css('--muted'), 600);
+  }
   // Marcas de hora cheia
   for (let t = Math.ceil(t0 / 3600e3) * 3600e3; t <= t1; t += 3600e3) txt(s, x(t), H - 8, horaBR(new Date(t).toISOString()), 'middle');
   const linha = (val, cor, tracejado) => {
     const pts = P.map((p, i) => ({ v: val(p), t: ts[i] })).filter((q) => q.v != null);
     if (pts.length < 1) return;
-    el('path', { d: pts.map((q, i) => (i ? 'L' : 'M') + x(q.t) + ',' + y(q.v)).join(''), fill: 'none', stroke: cor, 'stroke-width': tracejado ? 1.6 : 2.4, 'stroke-dasharray': tracejado ? '5 4' : 'none', opacity: tracejado ? .85 : 1 }, s);
+    el('path', { d: pts.map((q, i) => (i && q.t - pts[i - 1].t <= PAUSA ? 'L' : 'M') + x(q.t) + ',' + y(q.v)).join(''), fill: 'none', stroke: cor, 'stroke-width': tracejado ? 1.6 : 2.4, 'stroke-dasharray': tracejado ? '5 4' : 'none', opacity: tracejado ? .85 : 1 }, s);
+    // Ponto isolado entre pausas (como a parcial das 17h06) vira uma bolinha, já que não forma linha.
+    pts.forEach((q, i) => {
+      const antes = i === 0 || q.t - pts[i - 1].t > PAUSA, depois = i === pts.length - 1 || pts[i + 1].t - q.t > PAUSA;
+      if (antes && depois) el('circle', { cx: x(q.t), cy: y(q.v), r: tracejado ? 2.5 : 3.5, fill: cor, opacity: tracejado ? .85 : 1 }, s);
+    });
   };
   linha((p) => p.t, css('--f'), true); linha((p) => p.t == null ? null : 100 - p.t, css('--l'), true);
   linha((p) => p.f, css('--f')); linha((p) => p.l, css('--l'));
