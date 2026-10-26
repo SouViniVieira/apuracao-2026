@@ -1,6 +1,7 @@
 # Grava o histórico da apuração nos servidores do GitHub, sem depender de nenhum computador ligado.
-# Começa ao publicar este arquivo; os horários abaixo continuam a gravação se o primeiro job
-# chegar ao limite de tempo do GitHub (6 h) antes do fim da apuração.
+# Começa ao publicar este arquivo ou pelo botão "Run workflow"; cada job grava por até 335 minutos,
+# retoma do histórico publicado e sai sozinho se a apuração já tiver terminado.
+# Os horários de reserva da noite da eleição foram removidos depois da apuração (eles se repetiriam todo ano).
 name: Gravar apuração
 
 on:
@@ -8,9 +9,6 @@ on:
     branches: [main]
     paths: ['.github/workflows/gravar.yml', 'coleta/gravar-nuvem.mjs']
   workflow_dispatch:
-  schedule:
-    - cron: '0 0 26 10 *'    # 21h de Brasília (fica na fila e começa quando o job anterior terminar)
-    - cron: '0 3 26 10 *'    # meia-noite de Brasília
 
 permissions:
   contents: write
