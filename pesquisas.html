@@ -57,7 +57,7 @@
     <section class="card prose" aria-labelledby="t-metodo">
       <h2 id="t-metodo">Como a projeção foi feita</h2>
       <p>Durante as três semanas entre os turnos, as pesquisas registradas no TSE foram reunidas a partir de reportagens (Gazeta do Povo, CNN, Metrópoles, InfoMoney, Poder360 e outras), sempre em votos válidos. Quando a notícia só trazia votos totais, o número foi convertido, como indicado na tabela.</p>
-      <p>Na véspera, a leitura juntou quatro coisas: a média das pesquisas mais recentes, o resultado do 1º turno (Flávio 47,03% x Lula 45,16%), o histórico de que nenhum candidato virou um 2º turno presidencial desde 1989 e o fato de as pesquisas já terem errado disputas apertadas nas duas direções.</p>
+      <p>Na véspera, a leitura juntou quatro coisas: a média das pesquisas mais recentes, o resultado do 1º turno (Flávio 47,03% x Lula 45,16%), o histórico, até então, de que nenhum candidato tinha virado um 2º turno presidencial desde 1989 e o fato de as pesquisas já terem errado disputas apertadas nas duas direções.</p>
       <p>O resultado foi uma faixa, não um número: Flávio com 51,5% no centro, 50% de chance de cair entre 49,8% e 53,2% e 80% de chance entre 48,3% e 54,7%.</p>
       <p><strong>Limites:</strong> é uma estimativa subjetiva feita com ajuda de IA, não um modelo estatístico calibrado. As pesquisas foram coletadas de notícias, então podem ter erros de transcrição; confira na fonte antes de reutilizar.</p>
     </section>
@@ -110,7 +110,7 @@ function mediaMovel() {
 function resumo() {
   const n = pesquisas.length;
   $('n-pesq').textContent = n;
-  $('periodo').textContent = `de ${dataBR(pesquisas[0].divulgacao)} a ${dataBR(pesquisas[n - 1].divulgacao)} de outubro`;
+  $('periodo').textContent = `de ${dataBR(pesquisas[0].divulgacao)} a ${dataBR(pesquisas[n - 1].divulgacao)}`;
   const frente = pesquisas.filter((p) => p.flavio > p.lula).length;
   $('n-frente').textContent = `${frente} de ${n}`;
   const mm = mediaMovel(), ult = mm[mm.length - 1];

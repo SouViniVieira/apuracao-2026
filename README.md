@@ -1,5 +1,7 @@
 # Apuração 2º turno 2026
 
+**In English:** a live dashboard for Brazil's 2026 presidential runoff, built in a day. It reads the official electoral court (TSE) API every 30 seconds behind a CDN cache, shows an accessible map and table by state (keyboard navigable, AA contrast in light and dark themes, no axe violations), estimates the final result state by state as votes come in, and recorded the whole night with GitHub Actions for a replay page. A projection was registered the day before and compared with the result without adjustments. Neutral by design: official data only, same treatment for both candidates, no campaign commentary. The pages are in Portuguese.
+
 Projeto de estudo de visualização de dados ao vivo, feito para acompanhar o 2º turno da eleição presidencial de 25/10/2026 entre Flávio Bolsonaro (PL) e Lula (PT). Ficou no ar durante a apuração em https://apuracao-vini.vercel.app e agora serve de registro de como a noite se desenrolou.
 
 Sem vínculo com candidatos, partidos ou institutos de pesquisa.

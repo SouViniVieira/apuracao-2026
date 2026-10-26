@@ -122,6 +122,7 @@ details.estados summary { cursor: pointer; font-weight: 600; min-height: 36px; d
 const NS = 'http://www.w3.org/2000/svg';
 const $ = (id) => document.getElementById(id);
 const br = (v, d = 1) => v == null || isNaN(v) ? '—' : Number(v).toFixed(d).replace('.', ',');
+const pct = (v) => br(v, Math.abs(v - 50) < 0.1 ? 2 : 1);
 const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const PEQUENOS = ['RN', 'PB', 'PE', 'AL', 'SE', 'ES', 'RJ'];
 const horaBR = (iso) => new Date(iso).toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' });
@@ -143,11 +144,11 @@ function momentos() {
   m.push({ i: 0, titulo: 'Saem os primeiros votos', det: `${br(p0.a, 2)}% apurado: ${lider(p0.f)} na frente com ${br(Math.max(p0.f, p0.l))}%.` });
   for (let i = 1; i < P.length; i++) {
     if (Date.parse(P[i].quando) - Date.parse(P[i - 1].quando) > PAUSA) m.push({ i, titulo: 'A apuração recomeça depois da prorrogação', det: `A votação foi estendida até as 19h nas seções que ainda estavam abertas, e a divulgação ficou parada das ${horaBR(P[i - 1].quando)} às ${horaBR(P[i].quando)}, em ${br(P[i - 1].a, 2)}% apurado.` });
-    if ((P[i].f >= 50) !== (P[i - 1].f >= 50)) m.push({ i, titulo: `${lider(P[i].f)} passa à frente na parcial`, det: `Com ${br(P[i].a)}% apurado: Lula ${br(P[i].l)}% x Flávio ${br(P[i].f)}%.` });
+    if ((P[i].f >= 50) !== (P[i - 1].f >= 50)) m.push({ i, titulo: `${lider(P[i].f)} passa à frente na parcial`, det: `Com ${br(P[i].a)}% apurado, ${lider(P[i].f)} fica ${Math.abs(P[i].atual.brasil.flavio.votos - P[i].atual.brasil.lula.votos).toLocaleString('pt-BR')} votos à frente: Lula ${pct(P[i].l)}% x Flávio ${pct(P[i].f)}%.` });
   }
   for (const marco of [25, 50, 75, 90]) {
     const i = P.findIndex((p) => p.a >= marco);
-    if (i > 0) m.push({ i, titulo: marco === 50 ? 'Metade das urnas apuradas' : `${marco}% das urnas apuradas`, det: `Parcial: Lula ${br(P[i].l)}% x Flávio ${br(P[i].f)}%` + (P[i].t != null ? `. Tendência: ${lider(P[i].t)} com ${br(Math.max(P[i].t, 100 - P[i].t))}%.` : '.') });
+    if (i > 0) m.push({ i, titulo: marco === 50 ? 'Metade das urnas apuradas' : `${marco}% das urnas apuradas`, det: `Parcial: Lula ${pct(P[i].l)}% x Flávio ${pct(P[i].f)}%` + (P[i].t != null ? `. Tendência: ${lider(P[i].t)} com ${pct(Math.max(P[i].t, 100 - P[i].t))}%.` : '.') });
   }
   const comT = P.map((p, i) => ({ ...p, i })).filter((p) => p.t != null);
   if (comT.length && final()) {
@@ -191,7 +192,7 @@ function drawMomento() {
   r.max = pontos.length - 1; r.value = idx;
   r.setAttribute('aria-valuetext', `${horaBR(p.quando)}, ${br(p.a)}% apurado`);
   const dif = p.f - p.l;
-  $('lead').textContent = `${horaBR(p.quando)}: ${lider(p.f)} à frente na parcial por ${br(Math.abs(dif))} pts` + (p.t != null ? `, tendência de ${lider(p.t)} com ${br(Math.max(p.t, 100 - p.t))}%.` : '.');
+  $('lead').textContent = `${horaBR(p.quando)}: ${lider(p.f)} à frente na parcial por ${br(Math.abs(dif))} pts` + (p.t != null ? `, tendência de ${lider(p.t)} com ${pct(Math.max(p.t, 100 - p.t))}%.` : '.');
   const box = $('agora'); box.textContent = '';
   const card = (lbl, valor, cls, sufixo) => { const c = h('div', null, null, box); h('div', 'lbl', lbl, c); const n = h('div', 'num' + (cls ? ' ' + cls : ''), valor, c); if (sufixo) h('small', null, sufixo, n); };
   card('Apurado', br(p.a), '', '%');
