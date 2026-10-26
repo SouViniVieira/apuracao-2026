@@ -142,7 +142,7 @@ function momentos() {
   const p0 = P[0];
   m.push({ i: 0, titulo: 'Saem os primeiros votos', det: `${br(p0.a, 2)}% apurado: ${lider(p0.f)} na frente com ${br(Math.max(p0.f, p0.l))}%.` });
   for (let i = 1; i < P.length; i++) {
-    if (Date.parse(P[i].quando) - Date.parse(P[i - 1].quando) > PAUSA) m.push({ i, titulo: 'A apuração recomeça depois da prorrogação', det: `A votação foi estendida até as 19h em todo o país, e a divulgação ficou parada das ${horaBR(P[i - 1].quando)} às ${horaBR(P[i].quando)}, em ${br(P[i - 1].a, 2)}% apurado.` });
+    if (Date.parse(P[i].quando) - Date.parse(P[i - 1].quando) > PAUSA) m.push({ i, titulo: 'A apuração recomeça depois da prorrogação', det: `A votação foi estendida até as 19h nas seções que ainda estavam abertas, e a divulgação ficou parada das ${horaBR(P[i - 1].quando)} às ${horaBR(P[i].quando)}, em ${br(P[i - 1].a, 2)}% apurado.` });
     if ((P[i].f >= 50) !== (P[i - 1].f >= 50)) m.push({ i, titulo: `${lider(P[i].f)} passa à frente na parcial`, det: `Com ${br(P[i].a)}% apurado: Lula ${br(P[i].l)}% x Flávio ${br(P[i].f)}%.` });
   }
   for (const marco of [25, 50, 75, 90]) {
@@ -197,7 +197,7 @@ function drawMomento() {
   card('Apurado', br(p.a), '', '%');
   card('Lula', br(p.l), 'l', '%');
   card('Flávio', br(p.f), 'f', '%');
-  card('Tendência de Flávio', p.t != null ? br(p.t) : '—', p.t != null ? (p.t >= 50 ? 'f' : 'l') : '', p.t != null ? '%' : '');
+  card(p.t != null ? `Tendência: ${lider(p.t)}` : 'Tendência', p.t != null ? br(Math.max(p.t, 100 - p.t)) : '—', p.t != null ? (p.t >= 50 ? 'f' : 'l') : '', p.t != null ? '%' : '');
   drawMapa(p.atual); drawTabela(p.atual);
 }
 

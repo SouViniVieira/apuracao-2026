@@ -11,13 +11,14 @@
 <script defer src="/_vercel/insights/script.js"></script>
 <style>
 .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
-.chance-row { display: grid; grid-template-columns: minmax(9rem, 13rem) 1fr 3.5rem; gap: 10px; align-items: center; font-size: 14px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.chance-row { display: grid; grid-template-columns: minmax(9rem, 13rem) 1fr 6.5rem; gap: 10px; align-items: center; font-size: 14px; padding: 6px 0; border-bottom: 1px solid var(--line); }
 .chance-row:last-child { border-bottom: 0; }
-.chance-bar { height: 12px; border-radius: 6px; background: var(--grid); overflow: hidden; }
+.chance-bar { height: 12px; border-radius: 6px; background: var(--f); overflow: hidden; }
 .chance-bar span { display: block; height: 100%; background: var(--l); }
-.chance-row .val { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.chance-row .val { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; line-height: 1.35; }
+.chance-row .val span { display: block; }
 .chance-row small { display: block; color: var(--muted); font-size: 12.5px; }
-@media (max-width: 560px) { .chance-row { grid-template-columns: 1fr 3.5rem; } .chance-bar { grid-column: 1 / -1; grid-row: 2; } }
+@media (max-width: 560px) { .chance-row { grid-template-columns: 1fr 6.5rem; } .chance-bar { grid-column: 1 / -1; grid-row: 2; } }
 </style>
 </head>
 <body>
@@ -61,8 +62,8 @@
       <p><strong>Limites:</strong> é uma estimativa subjetiva feita com ajuda de IA, não um modelo estatístico calibrado. As pesquisas foram coletadas de notícias, então podem ter erros de transcrição; confira na fonte antes de reutilizar.</p>
     </section>
     <section class="card" aria-labelledby="t-chances">
-      <h2 id="t-chances">Chance de Lula virar, segundo cada fonte</h2>
-      <p class="note" style="margin:0 0 6px">Na véspera da votação. Quanto maior a barra, maior a chance de virada.</p>
+      <h2 id="t-chances">Chances na véspera, segundo cada fonte</h2>
+      <p class="note" style="margin:0 0 6px">Registradas antes da votação. Na barra, a parte de Lula fica à esquerda e a de Flávio, à direita.</p>
       <div id="chances"></div>
     </section>
   </div>
@@ -171,7 +172,8 @@ function chances() {
     const sm = document.createElement('small'); sm.textContent = c.descricao; nome.appendChild(sm);
     const bar = document.createElement('div'); bar.className = 'chance-bar'; bar.setAttribute('aria-hidden', 'true');
     const fill = document.createElement('span'); fill.style.width = c.chance + '%'; bar.appendChild(fill);
-    const val = document.createElement('div'); val.className = 'val'; val.textContent = c.chance + '%';
+    const val = document.createElement('div'); val.className = 'val';
+    for (const t of [`Lula ${c.chance}%`, `Flávio ${100 - c.chance}%`]) { const sp = document.createElement('span'); sp.textContent = t; val.appendChild(sp); }
     row.append(nome, bar, val); box.appendChild(row);
   }
 }

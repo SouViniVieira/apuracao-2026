@@ -115,7 +115,7 @@ html { scroll-padding-top: 170px; }
     <div>
       <h1>Apuração do 2º turno 2026: <span class="f">Flávio</span> x <span class="l">Lula</span></h1>
       <div class="sub"><span class="dot" id="dot" aria-hidden="true"></span><span id="status" role="status">Conectando ao TSE…</span><button type="button" id="sync">Atualizar agora</button></div>
-      <p class="note" id="aviso-curto" style="margin:6px 0 0" hidden>A votação foi prorrogada até as 19h em todo o país; a divulgação parou em 0,25% às 17h06 e recomeçou depois das 19h.</p>
+      <p class="note" id="aviso-curto" style="margin:6px 0 0" hidden>A votação foi prorrogada até as 19h nas seções que ainda estavam abertas, depois de pedidos das duas campanhas; a divulgação parou em 0,25% às 17h06 e recomeçou depois das 19h.</p>
     </div>
     <nav class="pages" aria-label="Páginas">
       <a href="index.html" aria-current="page">Apuração</a>
@@ -126,9 +126,9 @@ html { scroll-padding-top: 170px; }
 
   <aside class="card aviso" id="aviso" aria-labelledby="t-aviso">
     <h2 id="t-aviso">Votação prorrogada até as 19h</h2>
-    <p>Segundo a imprensa, a votação foi estendida até as 19h (horário de Brasília) em todo o país, depois de pedidos das duas campanhas por problemas com ônibus e chuva em várias cidades. O TSE chegou a divulgar 0,25% das seções às 17h06 e parou. As próximas parciais devem sair depois das 19h.</p>
+    <p>Por decisão liminar do STF, a votação foi estendida até as 19h (horário de Brasília) nas seções que ainda estavam abertas, depois de pedidos das duas campanhas por problemas com ônibus e chuva em várias cidades. O TSE chegou a divulgar 0,25% das seções às 17h06 e parou. As próximas parciais devem sair depois das 19h.</p>
     <p>Esses 0,25% são muito poucos votos e ainda não indicam o resultado.</p>
-    <p class="note">Informação de 25/10, 17h20. Confira as atualizações no <a href="https://www.tse.jus.br/">site do TSE</a>.</p>
+    <p class="note">Informação de 25/10, 17h40. Confira as atualizações no <a href="https://www.tse.jus.br/">site do TSE</a>.</p>
   </aside>
 
   <section class="card placar" aria-labelledby="t-placar">
@@ -196,7 +196,7 @@ html { scroll-padding-top: 170px; }
 
   <section class="card table-wrap" aria-labelledby="t-tabela">
     <table>
-      <caption id="t-tabela">Resultado por estado <span class="note" style="font-weight:400">· Mudança: pontos de Flávio em relação ao 1º turno, considerando só os dois</span></caption>
+      <caption id="t-tabela">Resultado por estado <span class="note" style="font-weight:400">· Mudança: pontos de Flávio em relação ao 1º turno, considerando só os dois (para Lula, o mesmo valor com o sinal trocado)</span></caption>
       <thead><tr><th scope="col">Estado</th><th scope="col">Apurado</th><th scope="col">Flávio</th><th scope="col">Lula</th><th scope="col">Mudança</th></tr></thead>
       <tbody id="tabela"></tbody>
     </table>
@@ -457,7 +457,7 @@ function drawRegua(fv, tf) {
   const W = Math.max(300, box.clientWidth), H = 122, m = 8;
   const dd = Math.ceil(Math.max(8, Math.abs(P.p10 - 50) + 2, Math.abs(P.p90 - 50) + 2, fv != null ? Math.abs(fv - 50) + 1 : 0, tf != null ? Math.abs(tf - 50) + 1 : 0));
   const x = (v) => m + (v - (50 - dd)) / (2 * dd) * (W - 2 * m);
-  const s = svgBox(box, W, H, `Projeção da véspera: Flávio entre ${br(P.p10, 1)}% e ${br(P.p90, 1)}%, centro ${br(P.central, 1)}%` + (fv != null ? `. Parcial agora: Flávio ${br(fv)}%` : '') + (tf != null ? `. Tendência: Flávio ${br(tf, 1)}%` : ''));
+  const s = svgBox(box, W, H, `Projeção da véspera: Flávio entre ${br(P.p10, 1)}% e ${br(P.p90, 1)}%, centro ${br(P.central, 1)}%` + (fv != null ? `. Parcial agora: Lula ${br(100 - fv)}% x Flávio ${br(fv)}%` : '') + (tf != null ? `. Tendência: Lula ${br(100 - tf, 1)}% x Flávio ${br(tf, 1)}%` : ''));
   const by = 30, bh = 22, F = css('--f'), L = css('--l'), FG = css('--fg');
   el('rect', { x: x(50 - dd), y: by, width: x(50) - x(50 - dd), height: bh, fill: L, 'fill-opacity': .14 }, s);
   el('rect', { x: x(50), y: by, width: x(50 + dd) - x(50), height: bh, fill: F, 'fill-opacity': .14 }, s);
@@ -474,13 +474,13 @@ function drawRegua(fv, tf) {
   if (fv != null) {
     el('circle', { cx: x(fv), cy: by + bh / 2, r: 7, fill: fv >= 50 ? F : L, stroke: css('--panel'), 'stroke-width': 2 }, s);
     const ax = Math.min(Math.max(x(fv), 80), W - 80);
-    txt(s, ax, yb + 18, `agora: Flávio ${br(fv, 1)}`, 'middle', FG, 600);
+    txt(s, ax, yb + 18, `agora: ${fv >= 50 ? 'Flávio' : 'Lula'} ${br(Math.max(fv, 100 - fv), 1)}`, 'middle', FG, 600);
   }
   if (tf != null) {
     const cx = x(tf), cy = by + bh / 2, r = 8;
     el('path', { d: `M${cx},${cy - r}L${cx + r},${cy}L${cx},${cy + r}L${cx - r},${cy}Z`, fill: css('--panel'), stroke: tf >= 50 ? F : L, 'stroke-width': 3 }, s);
     const tx = Math.min(Math.max(cx, 80), W - 80);
-    txt(s, tx, yb + 36, `tendência: Flávio ${br(tf, 1)}`, 'middle', tf >= 50 ? css('--f-ink') : css('--l-ink'), 700);
+    txt(s, tx, yb + 36, `tendência: ${tf >= 50 ? 'Flávio' : 'Lula'} ${br(Math.max(tf, 100 - tf), 1)}`, 'middle', tf >= 50 ? css('--f-ink') : css('--l-ink'), 700);
   }
 }
 
@@ -504,7 +504,7 @@ function drawEvol(h) {
     el('path', { d: h.map((p, i) => (i ? 'L' : 'M') + x(p.a) + ',' + y(p[k])).join(''), fill: 'none', stroke: c, 'stroke-width': 2 }, s);
     h.forEach((p) => {
       const ci = el('circle', { cx: x(p.a), cy: y(p[k]), r: h.length > 60 ? 2.2 : 3.5, fill: c }, s);
-      ci.addEventListener('mousemove', (ev) => showTip(box, tip, ev, `${br(p.a)}% apurado · ${p.h || ''}`, `Flávio ${br(p.f)}% · Lula ${br(p.l)}%` + (p.t != null ? ` · tendência Flávio ${br(p.t, 1)}%` : '')));
+      ci.addEventListener('mousemove', (ev) => showTip(box, tip, ev, `${br(p.a)}% apurado · ${p.h || ''}`, `Flávio ${br(p.f)}% · Lula ${br(p.l)}%` + (p.t != null ? ` · tendência: Flávio ${br(p.t, 1)}% · Lula ${br(100 - p.t, 1)}%` : '')));
       ci.addEventListener('mouseleave', () => tip.style.display = 'none');
     });
   });
